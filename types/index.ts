@@ -10,6 +10,7 @@ export type PriceTier = "budget" | "mid-range" | "premium";
 export interface Product {
   id: string;
   title: string;
+  brand?: string;
   category: ProductCategory;
   description: string;
   images: [string, string] | [string, string, string];

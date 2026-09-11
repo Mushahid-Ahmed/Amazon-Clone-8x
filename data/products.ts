@@ -1,7 +1,7 @@
 import type { Product } from "../types";
 
 /** A deliberately varied, typed seed catalog used by the storefront. */
-export const products: Product[] = [
+const catalog: Product[] = [
   {
     id: "prod-01", title: "Echo Dot Smart Speaker", category: "Electronics",
     description: "A dependable everyday favorite designed for simple, enjoyable use.", images: ["https://picsum.photos/seed/amazon-1-1/640/640", "https://picsum.photos/seed/amazon-1-2/640/640"], price: 19.99, rating: 4.1, reviewCount: 265,
@@ -340,5 +340,10 @@ export const products: Product[] = [
   }
 ];
 
-export default products;
+const brands = ["Amazon Basics", "Echo", "Aurora", "PixelView", "Orbit", "Luma", "Nimbus", "FreshStart"];
+export const products: Product[] = catalog.map((product, index) => ({
+  ...product,
+  brand: brands[index % brands.length],
+}));
 
+export default products;
