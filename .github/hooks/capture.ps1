@@ -34,7 +34,13 @@ function Write-CaptureEntry {
 }
 
 if ($Event -eq "userPromptSubmitted") {
-  Write-CaptureEntry -Type "prompt" -Content ([string]$payload.prompt) -Timestamp ([long]$payload.timestamp)
+  $prompt = [string]$payload.prompt
+  $marker = "</branch_rename_request>"
+  $markerIndex = $prompt.LastIndexOf($marker)
+  if ($markerIndex -ge 0) {
+    $prompt = $prompt.Substring($markerIndex + $marker.Length).Trim()
+  }
+  Write-CaptureEntry -Type "prompt" -Content $prompt -Timestamp ([long]$payload.timestamp)
 }
 else {
   $transcriptPath = [string]$payload.transcriptPath
@@ -43,10 +49,12 @@ else {
     Get-Content -LiteralPath $transcriptPath | ForEach-Object {
       try {
         $eventRecord = $_ | ConvertFrom-Json
-        if ($eventRecord.type -eq "assistant.message" -and
-            $eventRecord.data.content -and
-            (-not $eventRecord.data.toolRequests -or $eventRecord.data.toolRequests.Count -eq 0)) {
+        if ($eventRecord.type -eq "assistant.message" -and $eventRecord.data.content) {
           $lastResponse = [string]$eventRecord.data.content
+        }
+        elseif ($eventRecord.type -eq "tool.execution_complete" -and
+                $eventRecord.data.result.content) {
+          $lastResponse = [string]$eventRecord.data.result.content
         }
       }
       catch {
