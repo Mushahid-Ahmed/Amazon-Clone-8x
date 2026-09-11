@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --color-amazon-navy: #131921;
+  --color-amazon-navy-light: #232f3e;
+  --color-amazon-orange: #ff9900;
+  --color-amazon-yellow: #febd69;
+  --color-amazon-bg: #eaeded;
+  --color-amazon-link: #007185;
+  --color-amazon-red: #b12704;
+}
+
+@layer base {
+  body {
+    background: #eaeDED;
+    color: #131921;
+  }
+}
