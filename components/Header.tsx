@@ -12,6 +12,7 @@ import {
   X,
 } from "lucide-react";
 import { useStore } from "../context/StoreContext";
+import { openCartDrawer } from "./cart/CartDrawer";
 
 const categories = [
   "Electronics",
@@ -85,7 +86,7 @@ export default function Header() {
             <Link href="/account" className="rounded border border-transparent px-2 py-1 hover:border-white"><small className="block text-xs text-slate-300">Hello, sign in</small><strong className="text-sm">Account & Lists</strong></Link>
             <Link href="/orders" className="rounded border border-transparent px-2 py-1 hover:border-white"><small className="block text-xs text-slate-300">Returns</small><strong className="text-sm">& Orders</strong></Link>
           </div>
-          <Link href="/cart" className="relative rounded border border-transparent px-2 py-2 hover:border-white" aria-label={`Cart with ${cartItemCount} items`}>
+          <Link href="/cart" onClick={() => openCartDrawer()} className="relative rounded border border-transparent px-2 py-2 hover:border-white" aria-label={`Cart with ${cartItemCount} items`}>
             <ShoppingCart size={28} />
             <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-amazon-orange px-1 text-center text-xs font-bold text-amazon-navy">{cartItemCount}</span>
             <span className="hidden text-sm font-bold sm:inline">Cart</span>

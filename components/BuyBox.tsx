@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import type { Product } from "../types";
 import { useStore } from "../context/StoreContext";
+import { openCartDrawer } from "./cart/CartDrawer";
 
 export default function BuyBox({ product }: { product: Product }) {
   const { addToCart } = useStore();
@@ -15,6 +16,7 @@ export default function BuyBox({ product }: { product: Product }) {
 
   function add() {
     addToCart(product, quantity);
+    openCartDrawer(product);
     setAdded(true);
     window.setTimeout(() => setAdded(false), 2500);
   }

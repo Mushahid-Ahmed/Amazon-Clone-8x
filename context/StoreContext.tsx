@@ -69,7 +69,7 @@ function storeReducer(state: StoreState, action: StoreAction): StoreState {
         cart: existing
           ? state.cart.map((item) =>
               item.product.id === action.product.id
-                ? { ...item, quantity: item.quantity + quantity }
+              ? { ...item, quantity: Math.min(10, item.quantity + quantity) }
                 : item,
             )
           : [...state.cart, { product: action.product, quantity }],
