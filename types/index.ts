@@ -1,9 +1,9 @@
 export type ProductCategory =
   | "Electronics"
+  | "Computers & Accessories"
   | "Home & Kitchen"
   | "Fashion"
-  | "Books"
-  | "Toys & Games";
+  | "Beauty & Personal Care";
 
 export type PriceTier = "budget" | "mid-range" | "premium";
 

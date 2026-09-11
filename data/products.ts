@@ -206,133 +206,133 @@ export const products: Product[] = [
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-30", title: "Ridge Polarized Sunglasses", category: "Fashion",
+    id: "prod-30", title: "Ridge USB-C Docking Station", category: "Computers & Accessories",
     description: "A dependable everyday favorite designed for simple, enjoyable use.", images: ["https://picsum.photos/seed/amazon-30-1/640/640", "https://picsum.photos/seed/amazon-30-2/640/640", "https://picsum.photos/seed/amazon-30-3/640/640"], price: 44.95, rating: 4.9, reviewCount: 4238,
     isPrime: false, isBestSeller: false, isDeal: true, isNew: false,
     priceTier: "mid-range", discount: { percent: 15, originalPrice: 52.88, requirement: "Buy 2 or more to save" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-31", title: "The Quiet Orbit", category: "Books",
+    id: "prod-31", title: "Nova Wireless Mouse", category: "Computers & Accessories",
     description: "A dependable everyday favorite designed for simple, enjoyable use.", images: ["https://picsum.photos/seed/amazon-31-1/640/640", "https://picsum.photos/seed/amazon-31-2/640/640"], price: 19.99, rating: 4.1, reviewCount: 4375,
     isPrime: true, isBestSeller: true, isDeal: true, isNew: true,
     priceTier: "budget", discount: { percent: 10, originalPrice: 22.21, requirement: "Clip coupon at checkout" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-32", title: "Practical Home Cooking", category: "Books",
+    id: "prod-32", title: "Orbit Laptop Stand", category: "Computers & Accessories",
     description: "Thoughtfully made with durable materials and an easy, comfortable design.", images: ["https://picsum.photos/seed/amazon-32-1/640/640", "https://picsum.photos/seed/amazon-32-2/640/640", "https://picsum.photos/seed/amazon-32-3/640/640"], price: 34.50, rating: 4.3, reviewCount: 4512,
     isPrime: false, isBestSeller: false, isDeal: false, isNew: false,
     priceTier: "mid-range", discount: { percent: 15, originalPrice: 40.59, requirement: "Buy 2 or more to save" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-33", title: "Gardeners Almanac", category: "Books",
+    id: "prod-33", title: "ClearView 1080p Monitor", category: "Computers & Accessories",
     description: "A practical upgrade that brings useful performance and lasting value.", images: ["https://picsum.photos/seed/amazon-33-1/640/640", "https://picsum.photos/seed/amazon-33-2/640/640"], price: 129.00, rating: 4.5, reviewCount: 4649,
     isPrime: true, isBestSeller: false, isDeal: false, isNew: false,
     priceTier: "premium", discount: { percent: 20, originalPrice: 161.25, requirement: "Clip coupon at checkout" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-34", title: "A Brief History of Ideas", category: "Books",
+    id: "prod-34", title: "Keycraft Mechanical Keyboard", category: "Computers & Accessories",
     description: "A dependable everyday favorite designed for simple, enjoyable use.", images: ["https://picsum.photos/seed/amazon-34-1/640/640", "https://picsum.photos/seed/amazon-34-2/640/640", "https://picsum.photos/seed/amazon-34-3/640/640"], price: 74.99, rating: 4.7, reviewCount: 4786,
     isPrime: false, isBestSeller: false, isDeal: true, isNew: false,
     priceTier: "mid-range", discount: { percent: 25, originalPrice: 99.99, requirement: "Buy 2 or more to save" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-35", title: "The Lighthouse Mystery", category: "Books",
+    id: "prod-35", title: "Pulse USB Microphone", category: "Computers & Accessories",
     description: "Thoughtfully made with durable materials and an easy, comfortable design.", images: ["https://picsum.photos/seed/amazon-35-1/640/640", "https://picsum.photos/seed/amazon-35-2/640/640"], price: 22.00, rating: 4.9, reviewCount: 4923,
     isPrime: true, isBestSeller: false, isDeal: false, isNew: true,
     priceTier: "budget", discount: { percent: 10, originalPrice: 24.44, requirement: "Clip coupon at checkout" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-36", title: "Everyday Sketching", category: "Books",
+    id: "prod-36", title: "Arc Laptop Backpack", category: "Computers & Accessories",
     description: "A practical upgrade that brings useful performance and lasting value.", images: ["https://picsum.photos/seed/amazon-36-1/640/640", "https://picsum.photos/seed/amazon-36-2/640/640", "https://picsum.photos/seed/amazon-36-3/640/640"], price: 59.95, rating: 4.1, reviewCount: 5060,
     isPrime: false, isBestSeller: true, isDeal: false, isNew: false,
     priceTier: "mid-range", discount: { percent: 15, originalPrice: 70.53, requirement: "Buy 2 or more to save" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-37", title: "Learning Python Clearly", category: "Books",
+    id: "prod-37", title: "LinkPro Ethernet Adapter", category: "Computers & Accessories",
     description: "A dependable everyday favorite designed for simple, enjoyable use.", images: ["https://picsum.photos/seed/amazon-37-1/640/640", "https://picsum.photos/seed/amazon-37-2/640/640"], price: 28.49, rating: 4.3, reviewCount: 5197,
     isPrime: true, isBestSeller: false, isDeal: true, isNew: false,
     priceTier: "mid-range", discount: { percent: 20, originalPrice: 35.61, requirement: "Clip coupon at checkout" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-38", title: "Stories from the Sea", category: "Books",
+    id: "prod-38", title: "PixelGuard Webcam", category: "Computers & Accessories",
     description: "Thoughtfully made with durable materials and an easy, comfortable design.", images: ["https://picsum.photos/seed/amazon-38-1/640/640", "https://picsum.photos/seed/amazon-38-2/640/640", "https://picsum.photos/seed/amazon-38-3/640/640"], price: 89.00, rating: 4.5, reviewCount: 5334,
     isPrime: false, isBestSeller: false, isDeal: false, isNew: false,
     priceTier: "premium", discount: { percent: 25, originalPrice: 118.67, requirement: "Buy 2 or more to save" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-39", title: "The Last Paper Crane", category: "Books",
+    id: "prod-39", title: "Swift External SSD", category: "Computers & Accessories",
     description: "A practical upgrade that brings useful performance and lasting value.", images: ["https://picsum.photos/seed/amazon-39-1/640/640", "https://picsum.photos/seed/amazon-39-2/640/640"], price: 16.99, rating: 4.7, reviewCount: 5471,
     isPrime: true, isBestSeller: false, isDeal: false, isNew: true,
     priceTier: "budget", discount: { percent: 10, originalPrice: 18.88, requirement: "Clip coupon at checkout" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-40", title: "Build-It Marble Run", category: "Toys & Games",
+    id: "prod-40", title: "GlowLab Vitamin C Serum", category: "Beauty & Personal Care",
     description: "A dependable everyday favorite designed for simple, enjoyable use.", images: ["https://picsum.photos/seed/amazon-40-1/640/640", "https://picsum.photos/seed/amazon-40-2/640/640"], price: 19.99, rating: 4.1, reviewCount: 5608,
     isPrime: true, isBestSeller: true, isDeal: true, isNew: true,
     priceTier: "budget", discount: { percent: 10, originalPrice: 22.21, requirement: "Clip coupon at checkout" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-41", title: "Galaxy Strategy Board Game", category: "Toys & Games",
+    id: "prod-41", title: "SilkTouch Facial Cleanser", category: "Beauty & Personal Care",
     description: "Thoughtfully made with durable materials and an easy, comfortable design.", images: ["https://picsum.photos/seed/amazon-41-1/640/640", "https://picsum.photos/seed/amazon-41-2/640/640", "https://picsum.photos/seed/amazon-41-3/640/640"], price: 34.50, rating: 4.3, reviewCount: 5745,
     isPrime: false, isBestSeller: false, isDeal: false, isNew: false,
     priceTier: "mid-range", discount: { percent: 15, originalPrice: 40.59, requirement: "Buy 2 or more to save" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-42", title: "Dino Explorer Kit", category: "Toys & Games",
+    id: "prod-42", title: "Botanical Hand Cream", category: "Beauty & Personal Care",
     description: "A practical upgrade that brings useful performance and lasting value.", images: ["https://picsum.photos/seed/amazon-42-1/640/640", "https://picsum.photos/seed/amazon-42-2/640/640"], price: 129.00, rating: 4.5, reviewCount: 5882,
     isPrime: true, isBestSeller: false, isDeal: false, isNew: false,
     priceTier: "premium", discount: { percent: 20, originalPrice: 161.25, requirement: "Clip coupon at checkout" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-43", title: "Artful Watercolors", category: "Toys & Games",
+    id: "prod-43", title: "Satin Hair Brush", category: "Beauty & Personal Care",
     description: "A dependable everyday favorite designed for simple, enjoyable use.", images: ["https://picsum.photos/seed/amazon-43-1/640/640", "https://picsum.photos/seed/amazon-43-2/640/640", "https://picsum.photos/seed/amazon-43-3/640/640"], price: 74.99, rating: 4.7, reviewCount: 6019,
     isPrime: false, isBestSeller: false, isDeal: true, isNew: false,
     priceTier: "mid-range", discount: { percent: 25, originalPrice: 99.99, requirement: "Buy 2 or more to save" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-44", title: "Rocket Science Set", category: "Toys & Games",
+    id: "prod-44", title: "CloudMist Body Lotion", category: "Beauty & Personal Care",
     description: "Thoughtfully made with durable materials and an easy, comfortable design.", images: ["https://picsum.photos/seed/amazon-44-1/640/640", "https://picsum.photos/seed/amazon-44-2/640/640"], price: 22.00, rating: 4.9, reviewCount: 6156,
     isPrime: true, isBestSeller: false, isDeal: false, isNew: true,
     priceTier: "budget", discount: { percent: 10, originalPrice: 24.44, requirement: "Clip coupon at checkout" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-45", title: "Cozy Plush Fox", category: "Toys & Games",
+    id: "prod-45", title: "PureBalance Shampoo", category: "Beauty & Personal Care",
     description: "A practical upgrade that brings useful performance and lasting value.", images: ["https://picsum.photos/seed/amazon-45-1/640/640", "https://picsum.photos/seed/amazon-45-2/640/640", "https://picsum.photos/seed/amazon-45-3/640/640"], price: 59.95, rating: 4.1, reviewCount: 6293,
     isPrime: false, isBestSeller: true, isDeal: false, isNew: false,
     priceTier: "mid-range", discount: { percent: 15, originalPrice: 70.53, requirement: "Buy 2 or more to save" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-46", title: "Junior Chess Club", category: "Toys & Games",
+    id: "prod-46", title: "Luminous Lip Balm", category: "Beauty & Personal Care",
     description: "A dependable everyday favorite designed for simple, enjoyable use.", images: ["https://picsum.photos/seed/amazon-46-1/640/640", "https://picsum.photos/seed/amazon-46-2/640/640"], price: 28.49, rating: 4.3, reviewCount: 6430,
     isPrime: true, isBestSeller: false, isDeal: true, isNew: false,
     priceTier: "mid-range", discount: { percent: 20, originalPrice: 35.61, requirement: "Clip coupon at checkout" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-47", title: "Magnetic Tile Builder", category: "Toys & Games",
+    id: "prod-47", title: "CalmSkin Face Mask", category: "Beauty & Personal Care",
     description: "Thoughtfully made with durable materials and an easy, comfortable design.", images: ["https://picsum.photos/seed/amazon-47-1/640/640", "https://picsum.photos/seed/amazon-47-2/640/640", "https://picsum.photos/seed/amazon-47-3/640/640"], price: 89.00, rating: 4.5, reviewCount: 6567,
     isPrime: false, isBestSeller: false, isDeal: false, isNew: false,
     priceTier: "premium", discount: { percent: 25, originalPrice: 118.67, requirement: "Buy 2 or more to save" },
     features: ["Designed for everyday use", "Quality-tested construction", "Compact, gift-ready packaging"], specifications: { "Material": "Premium composite", "Color": "Classic", "Warranty": "1 year limited" }
   },
   {
-    id: "prod-48", title: "Raceway Remote Car", category: "Toys & Games",
+    id: "prod-48", title: "FreshStart Deodorant", category: "Beauty & Personal Care",
     description: "A practical upgrade that brings useful performance and lasting value.", images: ["https://picsum.photos/seed/amazon-48-1/640/640", "https://picsum.photos/seed/amazon-48-2/640/640"], price: 16.99, rating: 4.7, reviewCount: 6704,
     isPrime: true, isBestSeller: false, isDeal: false, isNew: true,
     priceTier: "budget", discount: { percent: 10, originalPrice: 18.88, requirement: "Clip coupon at checkout" },
@@ -341,5 +341,4 @@ export const products: Product[] = [
 ];
 
 export default products;
-
 
