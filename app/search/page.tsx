@@ -1,4 +1,5 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import SearchFilters from "../../components/SearchFilters";
 import SearchResultItem from "../../components/SearchResultItem";
 import SearchSort from "../../components/SearchSort";
@@ -10,6 +11,14 @@ const sorts: SearchSortType[] = ["relevance", "price-low", "price-high", "rating
 
 function first(value: string | string[] | undefined) { return Array.isArray(value) ? value[0] : value; }
 function number(value: string | undefined) { const parsed = value ? Number(value) : undefined; return parsed !== undefined && Number.isFinite(parsed) ? parsed : undefined; }
+
+export async function generateMetadata({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
+  const params = await searchParams;
+  const query = first(params.q)?.trim();
+  const category = first(params.category);
+  const label = query ? `Search results for "${query}"` : category ? `${category} products` : "Search products";
+  return { title: label, description: `Browse ${label.toLowerCase()} at Amazon Clone.` };
+}
 
 export default async function SearchPage({ searchParams }: { searchParams: Promise<SearchParams> }) {
   const params = await searchParams;

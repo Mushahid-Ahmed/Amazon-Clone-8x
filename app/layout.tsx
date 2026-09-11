@@ -6,8 +6,8 @@ import Footer from "../components/Footer";
 import CartDrawer from "../components/cart/CartDrawer";
 
 export const metadata: Metadata = {
-  title: "Spend less. Smile more. — Clone Store",
-  description: "A minimal Amazon-inspired storefront scaffold.",
+  title: { default: "Amazon Clone", template: "%s | Amazon Clone" },
+  description: "Shop electronics, home, fashion, and more in the Amazon Clone educational storefront.",
 };
 
 export default function RootLayout({

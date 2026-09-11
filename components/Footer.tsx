@@ -32,7 +32,7 @@ export default function Footer() {
       </div>
       <div className="border-t border-slate-700 px-6 py-6 text-center text-xs text-slate-400">
         <Link href="/" className="text-lg font-bold text-white">amazon<span className="text-amazon-orange">.clone</span></Link>
-        <p className="mt-3">© 2025 Clone Store. Built for better shopping.</p>
+        <p className="mt-3">© 2026 Amazon Clone — Educational project</p>
       </div>
     </footer>
   );

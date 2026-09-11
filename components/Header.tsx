@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import {
   Menu,
   MapPin,
@@ -29,6 +29,13 @@ export default function Header() {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<(typeof categories)[number]>("Electronics");
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [badgePulse, setBadgePulse] = useState(false);
+  useEffect(() => {
+    if (!cartItemCount) return;
+    setBadgePulse(true);
+    const timer = window.setTimeout(() => setBadgePulse(false), 450);
+    return () => window.clearTimeout(timer);
+  }, [cartItemCount]);
 
   if (pathname === "/checkout") {
     return <header className="border-b border-slate-300 bg-white px-4 py-5"><div className="mx-auto flex max-w-7xl items-center justify-between"><Link href="/" className="text-xl font-bold tracking-tight text-amazon-navy">amazon<span className="text-amazon-orange">.clone</span></Link><span className="text-sm text-slate-600">Secure checkout</span></div></header>;
@@ -93,7 +100,7 @@ export default function Header() {
           </div>
           <Link href="/cart" onClick={() => openCartDrawer()} className="relative rounded border border-transparent px-2 py-2 hover:border-white" aria-label={`Cart with ${cartItemCount} items`}>
             <ShoppingCart size={28} />
-            <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-amazon-orange px-1 text-center text-xs font-bold text-amazon-navy">{cartItemCount}</span>
+            <span className={`absolute -right-1 -top-1 min-w-5 rounded-full bg-amazon-orange px-1 text-center text-xs font-bold text-amazon-navy ${badgePulse ? "animate-pulse" : ""}`}>{cartItemCount}</span>
             <span className="hidden text-sm font-bold sm:inline">Cart</span>
           </Link>
         </div>

@@ -15,4 +15,13 @@
     background: #eaeDED;
     color: #131921;
   }
+  :focus-visible {
+    outline: 3px solid #ff9900;
+    outline-offset: 2px;
+  }
+}
+
+@media (max-width: 640px) {
+  button, a { max-width: 100%; }
+  input, select { max-width: 100%; }
 }

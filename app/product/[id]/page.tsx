@@ -1,10 +1,17 @@
 import Link from "next/link";
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import ImageGallery from "../../../components/ImageGallery";
 import ProductCard from "../../../components/ProductCard";
 import ProductInfo from "../../../components/ProductInfo";
 import RecentlyViewedTracker from "../../../components/RecentlyViewedTracker";
 import { products } from "../../../data/products";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  const product = products.find((item) => item.id === id);
+  return product ? { title: product.title, description: product.description } : { title: "Product not found" };
+}
 
 export default async function ProductPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;

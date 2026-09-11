@@ -21,7 +21,7 @@ export default function ImageGallery({ product }: { product: Product }) {
             aria-label={`View image ${index + 1} of ${product.title}`}
             aria-pressed={selected === index}
           >
-            <Image src={image} alt="" fill sizes="64px" className="object-cover" />
+            <Image src={image} alt={`${product.title} thumbnail ${index + 1}`} fill sizes="64px" className="object-cover" />
           </button>
         ))}
       </div>
