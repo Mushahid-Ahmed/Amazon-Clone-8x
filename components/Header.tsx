@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { useState, type FormEvent } from "react";
 import {
   Menu,
@@ -24,10 +24,15 @@ const categories = [
 
 export default function Header() {
   const router = useRouter();
+  const pathname = usePathname();
   const { cartItemCount } = useStore();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<(typeof categories)[number]>("Electronics");
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  if (pathname === "/checkout") {
+    return <header className="border-b border-slate-300 bg-white px-4 py-5"><div className="mx-auto flex max-w-7xl items-center justify-between"><Link href="/" className="text-xl font-bold tracking-tight text-amazon-navy">amazon<span className="text-amazon-orange">.clone</span></Link><span className="text-sm text-slate-600">Secure checkout</span></div></header>;
+  }
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

@@ -54,6 +54,7 @@ export interface TrackingStep {
 export interface Order {
   id: string;
   items: CartItem[];
+  paymentMethod?: string;
   shippingAddress: Address;
   subtotal: number;
   shipping: number;

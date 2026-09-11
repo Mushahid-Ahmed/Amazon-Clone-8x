@@ -10,6 +10,8 @@ import {
   type ReactNode,
 } from "react";
 import type { CartItem, Order, Product, User } from "../types";
+import type { Address } from "../types";
+import { generateOrderId } from "../lib/utils";
 
 const STORAGE_KEY = "amazon-clone-store";
 
@@ -105,7 +107,12 @@ function storeReducer(state: StoreState, action: StoreAction): StoreState {
       };
     }
     case "ADD_ORDER":
-      return { ...state, orders: [action.order, ...state.orders], cart: [] };
+      return {
+        ...state,
+        orders: [action.order, ...state.orders],
+        user: { ...state.user, orders: [action.order, ...state.user.orders] },
+        cart: [],
+      };
     case "ADD_RECENTLY_VIEWED":
       return {
         ...state,
@@ -133,6 +140,7 @@ export interface StoreContextValue extends StoreState {
   removeSavedItem: (productId: string) => void;
   moveSavedToCart: (productId: string) => void;
   addOrder: (order: Order) => void;
+  placeOrder: (address: Address, paymentMethod: string) => Order;
   addRecentlyViewed: (product: Product) => void;
 }
 
@@ -174,6 +182,30 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       removeSavedItem: (productId) => dispatch({ type: "REMOVE_SAVED_ITEM", productId }),
       moveSavedToCart: (productId) => dispatch({ type: "MOVE_SAVED_TO_CART", productId }),
       addOrder: (order) => dispatch({ type: "ADD_ORDER", order }),
+      placeOrder: (address, paymentMethod) => {
+        const subtotal = state.cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
+        const shipping = subtotal >= 35 ? 0 : 4.99;
+        const tax = subtotal * 0.085;
+        const order: Order = {
+          id: generateOrderId(),
+          items: state.cart,
+          paymentMethod,
+          shippingAddress: { ...address },
+          subtotal,
+          shipping,
+          tax,
+          total: subtotal + shipping + tax,
+          placedAt: new Date().toISOString(),
+          status: "processing",
+          tracking: [
+            { label: "Order placed", description: "We received your order.", timestamp: new Date().toISOString(), completed: true },
+            { label: "Preparing for shipment", description: "Your items will be packed soon.", completed: false },
+            { label: "Delivered", description: "Your order will arrive soon.", completed: false },
+          ],
+        };
+        dispatch({ type: "ADD_ORDER", order });
+        return order;
+      },
       addRecentlyViewed: (product) => dispatch({ type: "ADD_RECENTLY_VIEWED", product }),
     }),
     [hydrated, mounted, state],
