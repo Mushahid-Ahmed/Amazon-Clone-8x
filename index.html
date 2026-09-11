@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Shopday — a delightful everyday marketplace demo.">
+  <title>Shopday | Everything you need, delivered</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div class="announcement"><span>Free shipping on orders $35+</span><span class="announcement-links">Shopday delivers smiles <span aria-hidden="true">✦</span></span></div>
+  <header class="site-header">
+    <div class="header-main container">
+      <button class="mobile-menu" aria-label="Open menu">☰</button>
+      <a class="brand" href="#" aria-label="Shopday home"><span class="brand-mark">S</span><span>shopday</span></a>
+      <div class="deliver-to"><span class="pin">⌖</span><span><small>Deliver to</small><strong>Everywhere <b>⌄</b></strong></span></div>
+      <form class="search" id="search-form" role="search"><select id="search-category" aria-label="Search category"><option value="all">All</option><option value="home">Home</option><option value="tech">Tech</option><option value="style">Style</option><option value="beauty">Beauty</option></select><input id="search-input" type="search" placeholder="Search for products, brands and more" autocomplete="off"><button aria-label="Search">⌕</button></form>
+      <div class="header-actions"><button class="account"><span class="action-icon">♙</span><span><small>Hello, sign in</small><strong>Account & Lists</strong></span></button><button class="orders"><span><small>Returns</small><strong>& Orders</strong></span></button><button class="cart-button" id="cart-open" aria-label="Open cart"><span class="cart-icon">🛒</span><b id="cart-count">0</b><span class="cart-label">Cart</span></button></div>
+    </div>
+    <nav class="nav-bar"><div class="container nav-inner"><button class="all-menu"><span>☰</span> All</button><a href="#deals">Today's deals</a><a href="#products">New arrivals</a><a href="#products">Best sellers</a><a href="#categories">Home & living</a><a href="#categories">Fashion</a><a href="#categories">Electronics</a><a href="#about">Customer service</a><span class="nav-spacer"></span><span class="nav-note">⌁ Curated for good living</span></div></nav>
+  </header>
+
+  <main>
+    <section class="hero container">
+      <div class="hero-copy"><p class="eyebrow">THE EVERYDAY EDIT</p><h1>Little things.<br><em>Big delight.</em></h1><p class="hero-lede">Thoughtfully chosen essentials to make your everyday feel a little more extraordinary.</p><a href="#products" class="primary-btn">Explore the collection <span>→</span></a><div class="hero-proof"><span class="avatar-stack"><i>☺</i><i>✦</i><i>♡</i></span><span>Loved by <strong>12,000+</strong> happy shoppers</span></div></div>
+      <div class="hero-art"><div class="sun-shape"></div><div class="hero-image"><img src="https://images.unsplash.com/photo-1602523961358-f9f03dd557db?auto=format&fit=crop&w=900&q=85" alt="A warm, styled living room"></div><div class="floating-card"><span class="float-icon">✦</span><span><strong>Made for you</strong><small>Handpicked, always</small></span></div><div class="scribble">good<br>stuff</div></div>
+    </section>
+
+    <section class="category-strip container" id="categories"><div class="section-heading"><div><p class="eyebrow">BROWSE YOUR WAY</p><h2>What are you into?</h2></div><button class="text-link" data-filter="all">View all <span>→</span></button></div><div class="category-grid"><button class="category-card active" data-filter="all"><span class="category-emoji">✦</span><strong>All picks</strong><small>Everything good</small></button><button class="category-card" data-filter="home"><span class="category-emoji">⌂</span><strong>Home & living</strong><small>Make space lovely</small></button><button class="category-card" data-filter="style"><span class="category-emoji">◒</span><strong>Style</strong><small>Wear your mood</small></button><button class="category-card" data-filter="tech"><span class="category-emoji">◉</span><strong>Tech & gadgets</strong><small>Smart little things</small></button><button class="category-card" data-filter="beauty"><span class="category-emoji">✿</span><strong>Self care</strong><small>Feel your best</small></button></div></section>
+
+    <section class="products-section container" id="products"><div class="section-heading products-heading"><div><p class="eyebrow">FRESHLY PICKED</p><h2>Trending right now <span class="spark">✦</span></h2></div><div class="sort-area"><span id="result-count">8 finds</span><label class="sort-select"><span>Sort by</span><select id="sort-select"><option value="featured">Featured</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="rating">Top rated</option></select></label></div></div><div class="product-grid" id="product-grid"></div><div class="empty-state" id="empty-state" hidden><span>◌</span><h3>No finds just yet</h3><p>Try a different search or category.</p><button class="secondary-btn" data-filter="all">Show all products</button></div></section>
+
+    <section class="deal-banner container" id="deals"><div><p class="eyebrow">WEEKEND TREAT</p><h2>Make room for<br><em>something lovely.</em></h2><p>Save 20% on home favorites this weekend.</p><button class="light-btn" data-filter="home">Shop home favorites <span>→</span></button></div><div class="deal-art"><div class="deal-circle">20<span>%</span><small>OFF</small></div><div class="deal-spark">✦</div><div class="deal-leaf">❧</div></div></section>
+    <section class="promise container" id="about"><div><span>✦</span><strong>Curated with care</strong><small>Only things we'd recommend to a friend.</small></div><div><span>♡</span><strong>Easy, breezy returns</strong><small>Changed your mind? No hard feelings.</small></div><div><span>⌁</span><strong>Delivery that delivers</strong><small>Fast, free shipping over $35.</small></div></section>
+  </main>
+  <footer><div class="container footer-inner"><a class="brand" href="#"><span class="brand-mark">S</span><span>shopday</span></a><span>Made for your everyday ✦</span><span>© 2024 Shopday demo</span></div></footer>
+
+  <div class="overlay" id="overlay"></div><aside class="cart-drawer" id="cart-drawer" aria-label="Shopping cart"><div class="drawer-head"><h2>Your cart <span id="drawer-count">(0)</span></h2><button id="cart-close" aria-label="Close cart">×</button></div><div class="cart-items" id="cart-items"></div><div class="cart-empty" id="cart-empty"><span>♡</span><h3>Your cart is waiting</h3><p>Add something lovely to get started.</p><button class="secondary-btn" id="browse-button">Browse picks</button></div><div class="cart-summary" id="cart-summary"><div><span>Subtotal</span><strong id="cart-subtotal">$0.00</strong></div><small>Taxes and shipping calculated at checkout</small><button class="checkout-btn" id="checkout-button">Continue to checkout <span>→</span></button></div></aside>
+  <div class="modal-wrap" id="product-modal"><div class="product-modal"><button class="modal-close" id="modal-close">×</button><div class="modal-image"><img id="modal-img" alt=""></div><div class="modal-info"><span class="product-tag" id="modal-tag"></span><h2 id="modal-name"></h2><div class="rating" id="modal-rating"></div><p id="modal-description"></p><div class="modal-price" id="modal-price"></div><div class="modal-actions"><div class="quantity"><button data-modal-qty="-1">−</button><span id="modal-qty">1</span><button data-modal-qty="1">+</button></div><button class="primary-btn add-modal" id="modal-add">Add to cart <span>→</span></button></div></div></div></div>
+  <div class="toast" id="toast"><span>✓</span><span id="toast-text">Added to cart</span></div>
+  <script src="app.js"></script>
+</body>
+</html>
