@@ -6,7 +6,7 @@ import type { ProductCategory } from "../types";
 const categories: ProductCategory[] = ["Electronics", "Computers & Accessories", "Home & Kitchen", "Fashion", "Beauty & Personal Care"];
 
 export default function CategoryGrid() {
-  const cards = categories.map((category) => ({ title: category, items: products.filter((product) => product.category === category).slice(0, 4), href: `/search?category=${encodeURIComponent(category)}` }));
+  const cards: { title: string; items: typeof products; href: string }[] = categories.map((category) => ({ title: category, items: products.filter((product) => product.category === category).slice(0, 4), href: `/search?category=${encodeURIComponent(category)}` }));
   cards.push({ title: "Today's Deals", items: products.filter((product) => product.isDeal).slice(0, 4), href: "/deals" });
   cards.push({ title: "Best Sellers", items: products.filter((product) => product.isBestSeller).slice(0, 4), href: "/search?sort=best-sellers" });
 

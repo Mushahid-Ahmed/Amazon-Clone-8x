@@ -29,8 +29,8 @@ export default function HeroBanner() {
       </div>
       <button type="button" onClick={() => setActive((active - 1 + slides.length) % slides.length)} aria-label="Previous slide" className="absolute left-3 top-1/2 rounded-full bg-white/80 p-2 text-amazon-navy shadow hover:bg-white"><ChevronLeft size={24} /></button>
       <button type="button" onClick={() => setActive((active + 1) % slides.length)} aria-label="Next slide" className="absolute right-3 top-1/2 rounded-full bg-white/80 p-2 text-amazon-navy shadow hover:bg-white"><ChevronRight size={24} /></button>
-      <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2" role="tablist" aria-label="Choose hero slide">
-        {slides.map((item, index) => <button key={item.title} type="button" onClick={() => setActive(index)} aria-label={`Show slide ${index + 1}`} aria-selected={active === index} className={`h-2.5 w-2.5 rounded-full ${active === index ? "bg-white" : "bg-white/40"}`} />)}
+      <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2" aria-label="Choose hero slide">
+        {slides.map((item, index) => <button key={item.title} type="button" onClick={() => setActive(index)} aria-label={`Show slide ${index + 1}${active === index ? " (current)" : ""}`} className={`h-2.5 w-2.5 rounded-full ${active === index ? "bg-white" : "bg-white/40"}`} />)}
       </div>
     </section>
   );
