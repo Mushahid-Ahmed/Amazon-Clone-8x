@@ -2,10 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { Check, ShieldCheck } from "lucide-react";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { useStore } from "../../context/StoreContext";
 import type { Address } from "../../types";
 import { formatPrice } from "../../lib/utils";
+import { products } from "../../data/products";
 
 const steps = ["Shipping", "Payment", "Review"];
 const emptyAddress: Address = {
@@ -22,15 +23,11 @@ const emptyAddress: Address = {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, cartSubtotal, user, hydrated, placeOrder } = useStore();
+  const { cart, cartSubtotal, user, addToCart, placeOrder } = useStore();
   const [step, setStep] = useState(0);
   const [address, setAddress] = useState<Address>(user.addresses.find((item) => item.isDefault) ?? emptyAddress);
   const [paymentMethod, setPaymentMethod] = useState("Visa ending in 4242");
   const [errors, setErrors] = useState<Record<string, string>>({});
-
-  useEffect(() => {
-    if (hydrated && cart.length === 0) router.replace("/cart");
-  }, [cart.length, hydrated, router]);
 
   const shipping = cartSubtotal >= 35 ? 0 : 4.99;
   const tax = cartSubtotal * 0.085;
@@ -58,7 +55,7 @@ export default function CheckoutPage() {
     router.push(`/order-confirmation/${order.id}`);
   }
 
-  if (!hydrated || cart.length === 0) return <div className="mx-auto max-w-7xl px-4 py-16 text-center">Loading checkout…</div>;
+  if (cart.length === 0) return <div className="mx-auto max-w-2xl px-4 py-20 text-center"><h1 className="text-3xl font-bold">Your checkout is waiting</h1><p className="mt-3 text-slate-600">Your cart is empty, but we picked a Prime favorite to get you started.</p><button type="button" onClick={() => addToCart(products[0])} className="mt-7 rounded-full bg-amazon-yellow px-6 py-3 font-semibold hover:bg-amber-400">Add Demo Prime Item to Cart &amp; Checkout</button></div>;
 
   return (
     <div className="bg-amazon-bg pb-10">

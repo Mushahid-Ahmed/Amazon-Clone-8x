@@ -15,6 +15,7 @@ import { useStore } from "../context/StoreContext";
 import { openCartDrawer } from "./cart/CartDrawer";
 
 const categories = [
+  "All Departments",
   "Electronics",
   "Computers & Accessories",
   "Home & Kitchen",
@@ -27,7 +28,7 @@ export default function Header() {
   const pathname = usePathname();
   const { cartItemCount } = useStore();
   const [query, setQuery] = useState("");
-  const [category, setCategory] = useState<(typeof categories)[number]>("Electronics");
+  const [category, setCategory] = useState<(typeof categories)[number]>("All Departments");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [badgePulse, setBadgePulse] = useState(false);
   useEffect(() => {
@@ -36,6 +37,11 @@ export default function Header() {
     const timer = window.setTimeout(() => setBadgePulse(false), 450);
     return () => window.clearTimeout(timer);
   }, [cartItemCount]);
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setQuery(params.get("q") ?? "");
+    setCategory((params.get("category") as (typeof categories)[number]) ?? "All Departments");
+  }, [pathname]);
 
   if (pathname === "/checkout") {
     return <header className="border-b border-slate-300 bg-white px-4 py-5"><div className="mx-auto flex max-w-7xl items-center justify-between"><Link href="/" className="text-xl font-bold tracking-tight text-amazon-navy">amazon<span className="text-amazon-orange">.clone</span></Link><span className="text-sm text-slate-600">Secure checkout</span></div></header>;
@@ -43,7 +49,8 @@ export default function Header() {
 
   function submitSearch(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const params = new URLSearchParams({ q: query.trim(), category });
+    const params = new URLSearchParams({ q: query.trim() });
+    if (category !== "All Departments") params.set("category", category);
     router.push(`/search?${params.toString()}`);
   }
 

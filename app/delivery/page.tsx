@@ -4,8 +4,7 @@ import Link from "next/link";
 import { useStore } from "../../context/StoreContext";
 
 export default function DeliveryPage() {
-  const { user, setDefaultAddress, hydrated } = useStore();
-  if (!hydrated) return <div className="mx-auto max-w-2xl px-4 py-16 text-center">Loading delivery preferences…</div>;
+  const { user, setDefaultAddress } = useStore();
   const selected = user.addresses.find((address) => address.isDefault) ?? user.addresses[0];
 
   return (

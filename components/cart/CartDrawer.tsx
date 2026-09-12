@@ -38,9 +38,10 @@ export default function CartDrawer() {
   useEffect(() => {
     if (!open) setJustAdded(null);
   }, [open]);
+  if (!open) return null;
 
   return (
-    <div className={`fixed inset-0 z-50 ${open ? "pointer-events-auto" : "pointer-events-none"}`} aria-hidden={!open}>
+    <div className="fixed inset-0 z-50">
       <button type="button" aria-label="Close cart" onClick={() => setOpen(false)} className={`absolute inset-0 bg-slate-950/50 transition-opacity ${open ? "opacity-100" : "opacity-0"}`} />
       <aside className={`absolute right-0 top-0 flex h-full w-full max-w-md flex-col bg-white shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`} role="dialog" aria-label="Shopping cart">
         <div className="flex items-center justify-between bg-amazon-navy px-5 py-4 text-white">

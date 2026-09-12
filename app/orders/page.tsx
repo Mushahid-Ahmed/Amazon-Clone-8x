@@ -39,7 +39,7 @@ function BuyAgainCard({ product, onAdd }: { product: Product; onAdd: () => void 
 }
 
 export default function OrdersPage() {
-  const { orders, addToCart, hydrated } = useStore();
+  const { orders, addToCart } = useStore();
   const [tab, setTab] = useState<Tab>("orders");
   const [query, setQuery] = useState("");
   const pastProducts = useMemo(() => {
@@ -56,7 +56,6 @@ export default function OrdersPage() {
     return matchesQuery && matchesTab;
   });
 
-  if (!hydrated) return <div className="mx-auto max-w-7xl px-4 py-16 text-center">Loading your orders…</div>;
 
   return (
     <div className="bg-amazon-bg pb-12">

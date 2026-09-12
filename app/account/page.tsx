@@ -4,8 +4,7 @@ import Link from "next/link";
 import { useStore } from "../../context/StoreContext";
 
 export default function AccountPage() {
-  const { user, orders, cartItemCount, setPrime, hydrated } = useStore();
-  if (!hydrated) return <div className="mx-auto max-w-7xl px-4 py-16 text-center">Loading your account…</div>;
+  const { user, orders, cartItemCount, setPrime } = useStore();
   const address = user.addresses.find((item) => item.isDefault) ?? user.addresses[0];
 
   return (

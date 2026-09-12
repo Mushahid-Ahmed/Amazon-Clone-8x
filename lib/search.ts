@@ -1,6 +1,6 @@
 import type { Product } from "../types";
 
-export type SearchSort = "relevance" | "price-low" | "price-high" | "rating" | "newest";
+export type SearchSort = "relevance" | "price-low" | "price-high" | "rating" | "newest" | "best-sellers";
 
 export interface SearchFilters {
   query?: string;
@@ -40,6 +40,7 @@ export function filterAndSortProducts(allProducts: Product[], filters: SearchFil
       if (sort === "price-high") return b.product.price - a.product.price;
       if (sort === "rating") return b.product.rating - a.product.rating || b.product.reviewCount - a.product.reviewCount;
       if (sort === "newest") return Number(b.product.isNew) - Number(a.product.isNew) || b.index - a.index;
+      if (sort === "best-sellers") return Number(b.product.isBestSeller) - Number(a.product.isBestSeller) || b.product.reviewCount - a.product.reviewCount;
       return (b.product.rating * Math.log10(b.product.reviewCount + 10)) - (a.product.rating * Math.log10(a.product.reviewCount + 10)) || a.index - b.index;
     })
     .map(({ product }) => product);

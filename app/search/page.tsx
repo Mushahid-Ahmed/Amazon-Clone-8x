@@ -7,7 +7,7 @@ import { products } from "../../data/products";
 import { filterAndSortProducts, type SearchSort as SearchSortType } from "../../lib/search";
 
 type SearchParams = Record<string, string | string[] | undefined>;
-const sorts: SearchSortType[] = ["relevance", "price-low", "price-high", "rating", "newest"];
+const sorts: SearchSortType[] = ["relevance", "price-low", "price-high", "rating", "newest", "best-sellers"];
 
 function first(value: string | string[] | undefined) { return Array.isArray(value) ? value[0] : value; }
 function number(value: string | undefined) { const parsed = value ? Number(value) : undefined; return parsed !== undefined && Number.isFinite(parsed) ? parsed : undefined; }

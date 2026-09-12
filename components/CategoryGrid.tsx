@@ -7,8 +7,8 @@ const categories: ProductCategory[] = ["Electronics", "Computers & Accessories",
 
 export default function CategoryGrid() {
   const cards: { title: string; items: typeof products; href: string }[] = categories.map((category) => ({ title: category, items: products.filter((product) => product.category === category).slice(0, 4), href: `/search?category=${encodeURIComponent(category)}` }));
-  cards.push({ title: "Today's Deals", items: products.filter((product) => product.isDeal).slice(0, 4), href: "/deals" });
-  cards.push({ title: "Best Sellers", items: products.filter((product) => product.isBestSeller).slice(0, 4), href: "/search?sort=best-sellers" });
+  cards.push({ title: "Trending in Electronics", items: products.filter((product) => product.category === "Electronics").slice(0, 4), href: "/search?category=Electronics" });
+  cards.push({ title: "Top Rated", items: [...products].sort((a, b) => b.rating - a.rating).slice(0, 4), href: "/search?sort=rating" });
 
   return (
     <section className="relative z-10 mx-auto -mt-10 max-w-7xl px-4 sm:-mt-16">
