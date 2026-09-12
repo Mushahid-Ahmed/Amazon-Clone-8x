@@ -12,7 +12,7 @@ export default function SearchResultItem({ product }: { product: Product }) {
   return (
     <article className="flex gap-4 border-b border-slate-200 bg-white p-4">
       <Link href={`/product/${product.id}`} className="relative h-36 w-36 shrink-0 overflow-hidden rounded bg-slate-100 sm:h-48 sm:w-48">
-        <Image src={product.images[0]} alt={product.title} fill sizes="(max-width: 640px) 144px, 192px" className="object-cover" />
+        <Image src={product.images[0]} alt="" fill sizes="(max-width: 640px) 144px, 192px" className="object-cover" />
       </Link>
       <div className="min-w-0 flex-1">
         <Link href={`/product/${product.id}`} className="text-base font-medium text-amazon-link hover:text-amazon-red hover:underline sm:text-lg">{product.title}</Link>

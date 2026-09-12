@@ -17,7 +17,7 @@ export default function CategoryGrid() {
           <article key={card.title} className="rounded-lg bg-white p-4 shadow-md">
             <h2 className="mb-3 text-xl font-bold">{card.title}</h2>
             <div className="grid grid-cols-2 gap-3">
-              {card.items.map((product) => <Link key={product.id} href={`/product/${product.id}`} className="group"><div className="relative aspect-square overflow-hidden rounded bg-slate-100"><Image src={product.images[0]} alt={product.title} fill sizes="140px" className="object-cover transition group-hover:scale-105" /></div><p className="mt-1 line-clamp-1 text-xs text-amazon-link group-hover:underline">{product.title}</p></Link>)}
+              {card.items.map((product) => <Link key={product.id} href={`/product/${product.id}`} className="group"><div className="relative aspect-square overflow-hidden rounded bg-slate-100"><Image src={product.images[0]} alt="" fill sizes="140px" className="object-cover transition group-hover:scale-105" /></div><p className="mt-1 line-clamp-1 text-xs text-amazon-link group-hover:underline">{product.title}</p></Link>)}
             </div>
             <Link href={card.href} className="mt-4 inline-block text-sm text-amazon-link hover:text-amazon-red hover:underline">See more</Link>
           </article>
