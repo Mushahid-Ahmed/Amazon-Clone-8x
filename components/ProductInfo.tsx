@@ -19,7 +19,7 @@ export default function ProductInfo({ product }: { product: Product }) {
         <hr className="my-4 border-slate-200" />
         {product.isDeal && <p className="inline-block rounded-sm bg-amazon-red px-2 py-1 text-sm font-bold text-white">Limited time deal</p>}
         <div className="mt-2 text-3xl font-medium">${product.price.toFixed(2)}</div>
-        {product.discount && <p className="text-sm text-slate-500">List Price: <span className="line-through">${product.discount.originalPrice.toFixed(2)}</span></p>}
+        {product.discount && <p className="text-sm text-slate-700">List Price: <span className="line-through">${product.discount.originalPrice.toFixed(2)}</span></p>}
         <p className="mt-2 text-sm text-slate-700">FREE Returns &nbsp; | &nbsp; <span className="font-semibold">Prime</span> FREE delivery</p>
         <ul className="mt-5 space-y-2 text-sm text-slate-800">
           {product.features.map((feature) => <li key={feature} className="flex gap-2"><Check size={17} className="mt-0.5 shrink-0 text-emerald-600" />{feature}</li>)}

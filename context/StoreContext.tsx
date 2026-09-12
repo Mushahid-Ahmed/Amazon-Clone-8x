@@ -217,7 +217,11 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       hydrated,
       cartItemCount: state.cart.reduce((count, item) => count + item.quantity, 0),
       cartSubtotal: state.cart.reduce((total, item) => total + item.product.price * item.quantity, 0),
-      addToCart: (product, quantity) => dispatch({ type: "ADD_TO_CART", product, quantity }),
+      addToCart: (product, quantity) => {
+        const nextState = storeReducer(state, { type: "ADD_TO_CART", product, quantity });
+        dispatch({ type: "ADD_TO_CART", product, quantity });
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+      },
       removeFromCart: (productId) => dispatch({ type: "REMOVE_FROM_CART", productId }),
       updateCartQuantity: (productId, quantity) =>
         dispatch({ type: "UPDATE_CART_QUANTITY", productId, quantity }),

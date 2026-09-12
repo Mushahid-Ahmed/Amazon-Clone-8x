@@ -34,8 +34,8 @@ export default function BuyBox({ product }: { product: Product }) {
         <span className="text-sm font-medium">Qty:</span>
         <div className="flex items-center rounded border border-slate-300">
           <button type="button" className="p-2 disabled:opacity-40" onClick={() => setQuantity((value) => Math.max(1, value - 1))} disabled={quantity === 1} aria-label="Decrease quantity"><Minus size={16} /></button>
-          <span className="min-w-8 text-center text-sm">{quantity}</span>
-          <button type="button" className="p-2" onClick={() => setQuantity((value) => Math.min(10, value + 1))} aria-label="Increase quantity"><Plus size={16} /></button>
+          <span className="min-w-8 text-center text-sm" aria-label={`Quantity: ${quantity}`}>{quantity}</span>
+          <button type="button" className="p-2 disabled:opacity-40" onClick={() => setQuantity((value) => Math.min(10, value + 1))} disabled={quantity === 10} aria-label="Increase quantity"><Plus size={16} /></button>
         </div>
       </div>
       <button type="button" onClick={add} disabled={!inStock} className="mt-5 flex w-full items-center justify-center gap-2 rounded-full bg-amazon-yellow px-4 py-2.5 font-medium hover:bg-amber-400 disabled:cursor-not-allowed disabled:opacity-50">

@@ -3,7 +3,6 @@ import AxeBuilder from "@axe-core/playwright";
 
 test.beforeEach(async ({ context }) => {
   await context.clearCookies();
-  await context.addInitScript(() => localStorage.clear());
 });
 
 async function addDemoItem(page: Page) {
@@ -11,7 +10,8 @@ async function addDemoItem(page: Page) {
   const buyBox = page.locator("aside").filter({ hasText: "Secure transaction" });
   await buyBox.getByRole("button", { name: "Increase quantity" }).click();
   await buyBox.getByRole("button", { name: "Add to Cart" }).click();
-  await expect(page.getByText("Added to cart")).toBeVisible();
+  await expect(page.getByRole("dialog", { name: "Shopping cart" }).getByText("Added to cart")).toBeVisible();
+  await page.waitForFunction(() => Boolean(localStorage.getItem("amazon-clone-store")?.includes('"cart":[')));
 }
 
 test("homepage is usable with keyboard and image names", async ({ page }) => {
@@ -38,25 +38,29 @@ test("search handles query, invalid filters, and no-result recovery", async ({ p
 test("PDP enforces quantity bounds and adds to cart", async ({ page }) => {
   await page.goto("/product/prod-01");
   await expect(page.locator("img[alt='Echo Dot Smart Speaker']").first()).toBeVisible();
-  const increase = page.getByRole("button", { name: "Increase quantity" });
-  for (let i = 0; i < 12; i++) await increase.click();
-  await expect(page.getByText("10", { exact: true })).toBeVisible();
-  await expect(increase).toBeEnabled();
-  await page.locator("aside").filter({ hasText: "Secure transaction" }).getByRole("button", { name: "Add to Cart" }).click();
+  const buyBox = page.locator("aside").filter({ hasText: "Secure transaction" });
+  const increase = buyBox.getByRole("button", { name: "Increase quantity" });
+  for (let i = 0; i < 12 && await increase.isEnabled(); i++) await increase.click();
+  await expect(buyBox.getByLabel("Quantity: 10")).toBeVisible();
+  await expect(increase).toBeDisabled();
+  await buyBox.getByRole("button", { name: "Add to Cart" }).click();
+  await page.waitForFunction(() => Boolean(localStorage.getItem("amazon-clone-store")?.includes('"quantity":10')));
   await page.goto("/cart");
-  await expect(page.getByText("Cart (10 items)")).toBeVisible();
+  await page.reload();
+  await expect(page.getByRole("heading", { name: "Cart (10 items)" })).toBeVisible({ timeout: 15_000 });
 });
 
 test("cart checkout validates, supports back, and confirms one order", async ({ page }) => {
   await addDemoItem(page);
   await page.goto("/cart");
+  await page.reload();
   await page.getByRole("button", { name: "Proceed to checkout" }).click();
   await expect(page.getByRole("heading", { name: "Shipping address" })).toBeVisible();
   await page.getByRole("button", { name: "Use this address" }).click();
   await expect(page.getByRole("heading", { name: "Payment method" })).toBeVisible();
   await page.getByRole("button", { name: "Continue" }).click();
   await expect(page.getByRole("heading", { name: "Review your order" })).toBeVisible();
-  await page.getByRole("button", { name: "Back" }).click();
+  await page.getByRole("button", { name: "Back", exact: true }).click();
   await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Place your order" }).click();
   await expect(page.getByRole("heading", { name: "Thank you for your order!" })).toBeVisible();

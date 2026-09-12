@@ -11,7 +11,7 @@ export default function SearchResultItem({ product }: { product: Product }) {
   const [toast, setToast] = useState(false);
   return (
     <article className="flex gap-4 border-b border-slate-200 bg-white p-4">
-      <Link href={`/product/${product.id}`} className="relative h-36 w-36 shrink-0 overflow-hidden rounded bg-slate-100 sm:h-48 sm:w-48">
+      <Link href={`/product/${product.id}`} aria-label={`View ${product.title}`} className="relative h-36 w-36 shrink-0 overflow-hidden rounded bg-slate-100 sm:h-48 sm:w-48">
         <Image src={product.images[0]} alt="" fill sizes="(max-width: 640px) 144px, 192px" className="object-cover" />
       </Link>
       <div className="min-w-0 flex-1">
