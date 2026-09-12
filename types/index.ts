@@ -69,6 +69,7 @@ export interface User {
   id: string;
   name: string;
   email: string;
+  isPrime?: boolean;
   addresses: Address[];
   orders: Order[];
 }

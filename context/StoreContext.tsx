@@ -17,8 +17,9 @@ const STORAGE_KEY = "amazon-clone-store";
 
 const demoUser: User = {
   id: "user-demo",
-  name: "Alex Shopper",
+  name: "Alex Rivera",
   email: "alex@example.com",
+  isPrime: true,
   addresses: [
     {
       id: "address-demo",
@@ -29,6 +30,16 @@ const demoUser: User = {
       postalCode: "98101",
       country: "United States",
       isDefault: true,
+    },
+    {
+      id: "address-seattle-98121",
+      fullName: "Alex Rivera",
+      line1: "500 5th Avenue",
+      city: "Seattle",
+      state: "WA",
+      postalCode: "98121",
+      country: "United States",
+      isDefault: false,
     },
   ],
   orders: [],
@@ -59,6 +70,8 @@ type StoreAction =
   | { type: "MOVE_SAVED_TO_CART"; productId: string }
   | { type: "ADD_ORDER"; order: Order }
   | { type: "ADD_RECENTLY_VIEWED"; product: Product }
+  | { type: "SET_PRIME"; isPrime: boolean }
+  | { type: "SET_DEFAULT_ADDRESS"; addressId: string }
   | { type: "HYDRATE"; state: StoreState };
 
 function storeReducer(state: StoreState, action: StoreAction): StoreState {
@@ -121,6 +134,19 @@ function storeReducer(state: StoreState, action: StoreAction): StoreState {
           ...state.recentlyViewed.filter((product) => product.id !== action.product.id),
         ].slice(0, 10),
       };
+    case "SET_PRIME":
+      return { ...state, user: { ...state.user, isPrime: action.isPrime } };
+    case "SET_DEFAULT_ADDRESS":
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          addresses: state.user.addresses.map((address) => ({
+            ...address,
+            isDefault: address.id === action.addressId,
+          })),
+        },
+      };
     case "HYDRATE":
       return action.state;
     default:
@@ -142,6 +168,8 @@ export interface StoreContextValue extends StoreState {
   addOrder: (order: Order) => void;
   placeOrder: (address: Address, paymentMethod: string) => Order;
   addRecentlyViewed: (product: Product) => void;
+  setPrime: (isPrime: boolean) => void;
+  setDefaultAddress: (addressId: string) => void;
 }
 
 const StoreContext = createContext<StoreContextValue | undefined>(undefined);
@@ -207,6 +235,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         return order;
       },
       addRecentlyViewed: (product) => dispatch({ type: "ADD_RECENTLY_VIEWED", product }),
+      setPrime: (isPrime) => dispatch({ type: "SET_PRIME", isPrime }),
+      setDefaultAddress: (addressId) => dispatch({ type: "SET_DEFAULT_ADDRESS", addressId }),
     }),
     [hydrated, mounted, state],
   );
