@@ -11,6 +11,7 @@ const sorts: SearchSortType[] = ["relevance", "price-low", "price-high", "rating
 
 function first(value: string | string[] | undefined) { return Array.isArray(value) ? value[0] : value; }
 function number(value: string | undefined) { const parsed = value ? Number(value) : undefined; return parsed !== undefined && Number.isFinite(parsed) ? parsed : undefined; }
+function enabled(value: string | undefined) { return value === "1" || value === "true" || value === ""; }
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<SearchParams> }): Promise<Metadata> {
   const params = await searchParams;
@@ -29,7 +30,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const sort = sorts.includes(sortParam as SearchSortType) ? sortParam as SearchSortType : "relevance";
   const results = filterAndSortProducts(products, {
     query, category, brands: brandParam?.split(",").filter(Boolean), minPrice: number(first(params.minPrice)), maxPrice: number(first(params.maxPrice)),
-    minRating: number(first(params.minRating)), prime: Boolean(params.prime), deals: Boolean(params.deals), sort,
+    minRating: number(first(params.minRating)), prime: enabled(first(params.prime)), deals: enabled(first(params.deals)), sort,
   });
   const title = query ? `Results for "${query}"` : category ? `${category}` : "Search results";
 

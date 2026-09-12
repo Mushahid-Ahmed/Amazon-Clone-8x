@@ -25,8 +25,8 @@ export default function ProductCard({ product, compact = false }: { product: Pro
       className={`group flex min-w-0 flex-col rounded-lg border border-slate-200 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${compact ? "w-[210px] shrink-0 sm:w-[230px]" : ""}`}
     >
       <div className="relative mb-3 aspect-square overflow-hidden rounded-md bg-slate-100">
-        <Image src={product.images[0]} alt="" aria-hidden="true" fill sizes="(max-width: 640px) 45vw, 220px" className="object-cover transition-transform duration-300 group-hover:scale-105 group-hover:opacity-0" />
-        <Image src={product.images[1]} alt="" aria-hidden="true" fill sizes="(max-width: 640px) 45vw, 220px" className="object-cover opacity-0 transition-all duration-300 group-hover:scale-105 group-hover:opacity-100" />
+        <Image src={product.images[0]} alt={product.title} fill sizes="(max-width: 640px) 45vw, 220px" className="object-cover transition-transform duration-300 group-hover:scale-105 group-hover:opacity-0" />
+        <Image src={product.images[1]} alt={`${product.title} alternate view`} fill sizes="(max-width: 640px) 45vw, 220px" className="object-cover opacity-0 transition-all duration-300 group-hover:scale-105 group-hover:opacity-100" />
         {product.discount && (
           <span className="absolute left-2 top-2 rounded bg-amazon-red px-2 py-1 text-xs font-bold text-white">
             {product.discount.percent}% off

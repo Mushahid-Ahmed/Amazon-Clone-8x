@@ -4,10 +4,10 @@ import Link from "next/link";
 import { ArrowUp } from "lucide-react";
 
 const columns = [
-  { title: "Get to Know Us", links: ["About Us", "Careers", "Press Releases", "Our Partners"] },
-  { title: "Make Money with Us", links: ["Sell on Clone Store", "Affiliate Program", "Advertise Your Products", "Become a Supplier"] },
-  { title: "Payment Products", links: ["Clone Store Card", "Shop with Points", "Reload Your Balance", "Currency Converter"] },
-  { title: "Let Us Help You", links: ["Your Account", "Your Orders", "Shipping Rates", "Returns & Replacements"] },
+  { title: "Get to Know Us", links: [["About Us", "/"], ["Careers", "/account"], ["Press Releases", "/categories"], ["Our Partners", "/categories"]] },
+  { title: "Make Money with Us", links: [["Sell on Clone Store", "/account"], ["Affiliate Program", "/account"], ["Advertise Your Products", "/deals"], ["Become a Supplier", "/account"]] },
+  { title: "Payment Products", links: [["Clone Store Card", "/account"], ["Shop with Points", "/search"], ["Reload Your Balance", "/account"], ["Currency Converter", "/delivery"]] },
+  { title: "Let Us Help You", links: [["Your Account", "/account"], ["Your Orders", "/orders"], ["Shipping Rates", "/delivery"], ["Returns & Replacements", "/delivery"]] },
 ];
 
 export default function Footer() {
@@ -25,7 +25,7 @@ export default function Footer() {
           <section key={column.title}>
             <h2 className="mb-3 text-base font-bold text-white">{column.title}</h2>
             <ul className="grid gap-2 text-sm">
-              {column.links.map((link) => <li key={link}><Link href="#" className="hover:text-amazon-orange hover:underline">{link}</Link></li>)}
+              {column.links.map(([label, href]) => <li key={label}><Link href={href} className="hover:text-amazon-orange hover:underline">{label}</Link></li>)}
             </ul>
           </section>
         ))}

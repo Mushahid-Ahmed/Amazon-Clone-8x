@@ -105,7 +105,7 @@ export default function Header() {
             <Link href="/account" className="rounded border border-transparent px-2 py-1 hover:border-white"><small className="block text-xs text-slate-300">Hello, sign in</small><strong className="text-sm">Account & Lists</strong></Link>
             <Link href="/orders" className="rounded border border-transparent px-2 py-1 hover:border-white"><small className="block text-xs text-slate-300">Returns</small><strong className="text-sm">& Orders</strong></Link>
           </div>
-          <Link href="/cart" onClick={() => openCartDrawer()} className="relative rounded border border-transparent px-2 py-2 hover:border-white" aria-label={`Cart with ${cartItemCount} items`}>
+          <Link href="/cart" onClick={(event) => { event.preventDefault(); openCartDrawer(); }} className="relative rounded border border-transparent px-2 py-2 hover:border-white" aria-label={`Cart with ${cartItemCount} items`}>
             <ShoppingCart size={28} />
             <span className={`absolute -right-1 -top-1 min-w-5 rounded-full bg-amazon-orange px-1 text-center text-xs font-bold text-amazon-navy ${badgePulse ? "animate-pulse" : ""}`}>{cartItemCount}</span>
             <span className="hidden text-sm font-bold sm:inline">Cart</span>
@@ -123,7 +123,7 @@ export default function Header() {
       <nav className="hidden bg-amazon-navy-light px-4 py-2 lg:block">
         <div className="mx-auto flex max-w-7xl items-center gap-6 text-sm font-semibold">
           <Link href="/categories" className="rounded border border-transparent px-2 py-1 hover:border-white">☰ All</Link>
-          {categories.map((item) => <Link key={item} href={`/search?category=${encodeURIComponent(item)}`} className="rounded border border-transparent px-2 py-1 hover:border-white">{item}</Link>)}
+          {categories.map((item) => <Link key={item} href={item === "All Departments" ? "/search" : `/search?category=${encodeURIComponent(item)}`} className="rounded border border-transparent px-2 py-1 hover:border-white">{item}</Link>)}
           <Link href="/deals" className="ml-auto rounded border border-transparent px-2 py-1 hover:border-white">Today&apos;s Deals</Link>
         </div>
       </nav>
@@ -131,7 +131,7 @@ export default function Header() {
       {mobileOpen && (
         <nav className="border-t border-slate-600 bg-amazon-navy-light px-5 py-3 lg:hidden">
           <div className="grid gap-1 text-sm">
-            {categories.map((item) => <Link key={item} href={`/search?category=${encodeURIComponent(item)}`} onClick={() => setMobileOpen(false)} className="rounded px-3 py-2 hover:bg-slate-600">{item}</Link>)}
+            {categories.map((item) => <Link key={item} href={item === "All Departments" ? "/search" : `/search?category=${encodeURIComponent(item)}`} onClick={() => setMobileOpen(false)} className="rounded px-3 py-2 hover:bg-slate-600">{item}</Link>)}
             <Link href="/orders" onClick={() => setMobileOpen(false)} className="rounded px-3 py-2 hover:bg-slate-600">Returns & Orders</Link>
           </div>
         </nav>
