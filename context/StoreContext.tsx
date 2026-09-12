@@ -12,6 +12,7 @@ import {
 import type { CartItem, Order, Product, User } from "../types";
 import type { Address } from "../types";
 import { calculateShipping, generateOrderId } from "../lib/utils";
+import { products } from "../data/products";
 
 const STORAGE_KEY = "amazon-clone-store";
 
@@ -74,10 +75,10 @@ function storeReducer(state: StoreState, action: StoreAction): StoreState {
         cart: existing
           ? state.cart.map((item) =>
               item.product.id === action.product.id
-              ? { ...item, quantity: Math.min(10, item.quantity + quantity) }
+              ? { ...item, quantity: Math.min(10, Math.max(1, item.quantity + quantity)) }
                 : item,
             )
-          : [...state.cart, { product: action.product, quantity }],
+          : [...state.cart, { product: action.product, quantity: Math.min(10, quantity) }],
       };
     }
     case "REMOVE_FROM_CART":
@@ -89,7 +90,7 @@ function storeReducer(state: StoreState, action: StoreAction): StoreState {
           action.quantity > 0
             ? state.cart.map((item) =>
                 item.product.id === action.productId
-                  ? { ...item, quantity: action.quantity }
+                  ? { ...item, quantity: Math.min(10, Math.max(1, action.quantity)) }
                   : item,
               )
             : state.cart.filter((item) => item.product.id !== action.productId),
@@ -164,6 +165,27 @@ export interface StoreContextValue extends StoreState {
 
 const StoreContext = createContext<StoreContextValue | undefined>(undefined);
 
+function sanitizeStoredState(value: unknown): StoreState {
+  if (!value || typeof value !== "object") return initialState;
+  const saved = value as Partial<StoreState>;
+  const knownProducts = new Map(products.map((product) => [product.id, product]));
+  const cart = Array.isArray(saved.cart)
+    ? saved.cart.flatMap((item) => {
+        const product = item && typeof item === "object" ? knownProducts.get((item as { product?: { id?: string } }).product?.id ?? "") : undefined;
+        const rawQuantity = item && typeof item === "object" ? Number((item as { quantity?: unknown }).quantity) : 0;
+        return product && Number.isFinite(rawQuantity) && rawQuantity > 0
+          ? [{ product, quantity: Math.min(10, Math.max(1, Math.floor(rawQuantity))) }]
+          : [];
+      })
+    : [];
+  const savedItems = Array.isArray(saved.savedItems)
+    ? saved.savedItems.flatMap((item) => (item && typeof item === "object" && knownProducts.has((item as { id?: string }).id ?? "")
+      ? [knownProducts.get((item as { id: string }).id)!]
+      : []))
+    : [];
+  return { ...initialState, cart, savedItems, orders: Array.isArray(saved.orders) ? saved.orders : [], recentlyViewed: [] };
+}
+
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(storeReducer, initialState);
   const [mounted, setMounted] = useState(false);
@@ -174,19 +196,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY);
       if (stored) {
-        const saved = JSON.parse(stored) as StoreState;
-        dispatch({
-          type: "HYDRATE",
-          state: {
-            ...saved,
-            user: {
-              ...saved.user,
-              name: demoUser.name,
-              email: demoUser.email,
-              addresses: [{ ...demoUser.addresses[0] }],
-            },
-          },
-        });
+        const saved = sanitizeStoredState(JSON.parse(stored));
+        dispatch({ type: "HYDRATE", state: { ...saved, user: demoUser } });
       }
     } catch {
       // Invalid or unavailable storage should not prevent the storefront from rendering.

@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint ."
+    "lint": "eslint .",
+    "test:e2e": "playwright test",
+    "test:a11y": "playwright test --grep accessibility"
   },
   "dependencies": {
     "clsx": "^2.1.1",
