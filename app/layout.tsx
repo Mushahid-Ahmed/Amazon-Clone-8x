@@ -4,6 +4,7 @@ import StoreProviderBridge from "../context/StoreProvider";
 import Header from "../components/Header";
 import Footer from "../components/Footer";
 import CartDrawer from "../components/cart/CartDrawer";
+import { Suspense } from "react";
 
 export const metadata: Metadata = {
   title: { default: "Amazon Clone", template: "%s | Amazon Clone" },
@@ -17,7 +18,9 @@ export default function RootLayout({
     <html lang="en">
       <body className="flex min-h-screen flex-col bg-[#EAEDED]">
         <StoreProviderBridge>
-          <Header />
+          <Suspense fallback={<header className="h-28 bg-amazon-navy" aria-hidden="true" />}>
+            <Header />
+          </Suspense>
           <main className="flex-1">{children}</main>
           <Footer />
           <CartDrawer />

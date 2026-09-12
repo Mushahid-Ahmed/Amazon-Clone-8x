@@ -11,35 +11,25 @@ import {
 } from "react";
 import type { CartItem, Order, Product, User } from "../types";
 import type { Address } from "../types";
-import { generateOrderId } from "../lib/utils";
+import { calculateShipping, generateOrderId } from "../lib/utils";
 
 const STORAGE_KEY = "amazon-clone-store";
 
 const demoUser: User = {
   id: "user-demo",
   name: "Alex Rivera",
-  email: "alex@example.com",
+  email: "alex@demo.com",
   isPrime: true,
   addresses: [
     {
       id: "address-demo",
-      fullName: "Alex Shopper",
-      line1: "123 Market Street",
-      city: "Seattle",
-      state: "WA",
-      postalCode: "98101",
-      country: "United States",
-      isDefault: true,
-    },
-    {
-      id: "address-seattle-98121",
       fullName: "Alex Rivera",
-      line1: "500 5th Avenue",
+      line1: "2101 4th Avenue",
       city: "Seattle",
       state: "WA",
       postalCode: "98121",
       country: "United States",
-      isDefault: false,
+      isDefault: true,
     },
   ],
   orders: [],
@@ -183,7 +173,21 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     setMounted(true);
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored) dispatch({ type: "HYDRATE", state: JSON.parse(stored) as StoreState });
+      if (stored) {
+        const saved = JSON.parse(stored) as StoreState;
+        dispatch({
+          type: "HYDRATE",
+          state: {
+            ...saved,
+            user: {
+              ...saved.user,
+              name: demoUser.name,
+              email: demoUser.email,
+              addresses: [{ ...demoUser.addresses[0] }],
+            },
+          },
+        });
+      }
     } catch {
       // Invalid or unavailable storage should not prevent the storefront from rendering.
     } finally {
@@ -212,7 +216,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       addOrder: (order) => dispatch({ type: "ADD_ORDER", order }),
       placeOrder: (address, paymentMethod) => {
         const subtotal = state.cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
-        const shipping = subtotal >= 35 ? 0 : 4.99;
+        const shipping = calculateShipping(subtotal, Boolean(state.user.isPrime));
         const tax = subtotal * 0.085;
         const order: Order = {
           id: generateOrderId(),

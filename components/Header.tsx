@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useState, type FormEvent } from "react";
 import {
   Menu,
@@ -26,7 +26,8 @@ const categories = [
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
-  const { cartItemCount } = useStore();
+  const { cartItemCount, user } = useStore();
+  const searchParams = useSearchParams();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<(typeof categories)[number]>("All Departments");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -38,10 +39,9 @@ export default function Header() {
     return () => window.clearTimeout(timer);
   }, [cartItemCount]);
   useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    setQuery(params.get("q") ?? "");
-    setCategory((params.get("category") as (typeof categories)[number]) ?? "All Departments");
-  }, [pathname]);
+    setQuery(searchParams.get("q") ?? "");
+    setCategory((searchParams.get("category") as (typeof categories)[number]) ?? "All Departments");
+  }, [pathname, searchParams]);
 
   if (pathname === "/checkout") {
     return <header className="border-b border-slate-300 bg-white px-4 py-5"><div className="mx-auto flex max-w-7xl items-center justify-between"><Link href="/" className="text-xl font-bold tracking-tight text-amazon-navy">amazon<span className="text-amazon-orange">.clone</span></Link><span className="text-sm text-slate-600">Secure checkout</span></div></header>;
@@ -76,7 +76,7 @@ export default function Header() {
 
           <Link href="/delivery" className="hidden items-center gap-1 rounded border border-transparent px-2 py-1 hover:border-white lg:flex">
             <MapPin size={18} />
-            <span><small className="block text-xs text-slate-300">Deliver to</small><strong className="text-sm">Seattle 98101</strong></span>
+            <span><small className="block text-xs text-slate-300">Deliver to</small><strong className="text-sm">{user.addresses.find((address) => address.isDefault)?.city ?? "Seattle"} {user.addresses.find((address) => address.isDefault)?.postalCode ?? "98121"}</strong></span>
           </Link>
 
           <form onSubmit={submitSearch} className="order-3 flex min-w-0 flex-1 overflow-hidden rounded-md bg-white focus-within:ring-2 focus-within:ring-amazon-orange sm:order-none">
@@ -114,7 +114,7 @@ export default function Header() {
 
         <div className="mx-auto mt-3 flex max-w-7xl items-center gap-2 lg:hidden">
           <Link href="/delivery" className="flex flex-1 items-center gap-2 rounded border border-transparent px-2 py-1 hover:border-white">
-            <MapPin size={17} /><span className="text-xs"><span className="text-slate-300">Deliver to</span> <strong>Seattle 98101</strong></span>
+            <MapPin size={17} /><span className="text-xs"><span className="text-slate-300">Deliver to</span> <strong>{user.addresses.find((address) => address.isDefault)?.city ?? "Seattle"} {user.addresses.find((address) => address.isDefault)?.postalCode ?? "98121"}</strong></span>
           </Link>
           <Link href="/account" className="rounded border border-transparent px-2 py-1 text-xs hover:border-white"><UserRound size={16} className="mr-1 inline" />Account</Link>
         </div>

@@ -2,10 +2,10 @@
 
 import { useRouter } from "next/navigation";
 import { Check, ShieldCheck } from "lucide-react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { useStore } from "../../context/StoreContext";
 import type { Address } from "../../types";
-import { formatPrice } from "../../lib/utils";
+import { calculateShipping, formatPrice } from "../../lib/utils";
 import { products } from "../../data/products";
 
 const steps = ["Shipping", "Payment", "Review"];
@@ -23,14 +23,19 @@ const emptyAddress: Address = {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, cartSubtotal, user, addToCart, placeOrder } = useStore();
+  const { cart, cartSubtotal, user, hydrated, addToCart, placeOrder } = useStore();
   const [step, setStep] = useState(0);
   const [address, setAddress] = useState<Address>(user.addresses.find((item) => item.isDefault) ?? emptyAddress);
   const [paymentMethod, setPaymentMethod] = useState("Visa ending in 4242");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
 
-  const shipping = cartSubtotal >= 35 ? 0 : 4.99;
+  useEffect(() => {
+    const defaultAddress = user.addresses.find((item) => item.isDefault);
+    if (defaultAddress) setAddress(defaultAddress);
+  }, [hydrated, user.addresses]);
+
+  const shipping = calculateShipping(cartSubtotal, Boolean(user.isPrime));
   const tax = cartSubtotal * 0.085;
   const total = cartSubtotal + shipping + tax;
 

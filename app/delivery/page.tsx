@@ -21,7 +21,7 @@ export default function DeliveryPage() {
             </label>
           ))}
         </div>
-        <p className="mt-5 text-xs text-slate-500">Demo delivery locations: Seattle 98101 and Seattle 98121.</p>
+        <p className="mt-5 text-xs text-slate-500">Demo delivery address: 2101 4th Avenue, Seattle, WA 98121.</p>
       </section>
       <Link href="/" className="mt-6 inline-block rounded-full bg-amazon-yellow px-5 py-2.5 font-semibold hover:bg-amber-400">Return to shopping</Link>
     </div>

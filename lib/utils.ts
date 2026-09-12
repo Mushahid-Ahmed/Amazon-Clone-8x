@@ -5,6 +5,10 @@ export function formatPrice(value: number): string {
   return new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(value);
 }
 
+export function calculateShipping(subtotal: number, isPrime: boolean): number {
+  return isPrime || subtotal > 25 ? 0 : 5.99;
+}
+
 export function formatPriceWithCommas(value: number): string {
   return value.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
