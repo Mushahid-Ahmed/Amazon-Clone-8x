@@ -3,3 +3,9 @@ node_modules/
 out/
 *.tsbuildinfo
 .env*
+prisma/dev.db
+prisma/dev.db-journal
+prisma/schema.deploy.prisma
+test.db
+test.db-journal
+.vercel/

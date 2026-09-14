@@ -1,0 +1,163 @@
+// Canonical Prisma schema — provider-agnostic (no enums, no Json type) so the same
+// schema runs on SQLite locally and PostgreSQL in production. scripts/prepare-db.mjs
+// swaps the provider line at deploy time when a Postgres URL is present.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String     @id @default(cuid())
+  name         String
+  email        String     @unique
+  passwordHash String
+  isPrime      Boolean    @default(false)
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  sessions     Session[]
+  addresses    Address[]
+  reviews      Review[]
+  cartItems    CartItem[]
+  orders       Order[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+  expiresAt DateTime
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model Address {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  fullName   String
+  line1      String
+  line2      String?
+  city       String
+  state      String
+  postalCode String
+  country    String   @default("United States")
+  isDefault  Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Product {
+  id                  String      @id
+  title               String
+  brand               String?
+  category            String
+  description         String
+  images              String
+  price               Float
+  rating              Float       @default(0)
+  reviewCount         Int         @default(0)
+  isPrime             Boolean     @default(false)
+  isBestSeller        Boolean     @default(false)
+  isDeal              Boolean     @default(false)
+  isNew               Boolean     @default(false)
+  priceTier           String      @default("mid-range")
+  discountPercent     Int?
+  originalPrice       Float?
+  discountRequirement String?
+  features            String
+  specifications      String
+  stock               Int         @default(25)
+  createdAt           DateTime    @default(now())
+  reviews             Review[]
+  cartItems           CartItem[]
+  orderItems          OrderItem[]
+
+  @@index([category])
+  @@index([price])
+}
+
+model Review {
+  id         String   @id @default(cuid())
+  productId  String
+  product    Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  userId     String
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  authorName String
+  rating     Int
+  title      String
+  body       String
+  helpful    Int      @default(0)
+  createdAt  DateTime @default(now())
+
+  @@unique([productId, userId])
+  @@index([productId])
+}
+
+model CartItem {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity      Int      @default(1)
+  savedForLater Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@unique([userId, productId])
+}
+
+model Order {
+  id              String          @id
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status          String          @default("processing")
+  paymentMethod   String
+  paymentStatus   String          @default("paid")
+  subtotal        Float
+  shipping        Float
+  tax             Float
+  total           Float
+  placedAt        DateTime        @default(now())
+  shippingAddress String
+  items           OrderItem[]
+  events          TrackingEvent[]
+
+  @@index([userId, placedAt])
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  title     String
+  image     String
+  price     Float
+  quantity  Int
+
+  @@index([orderId])
+}
+
+model TrackingEvent {
+  id          String    @id @default(cuid())
+  orderId     String
+  order       Order     @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  label       String
+  description String
+  timestamp   DateTime?
+  completed   Boolean   @default(false)
+  sortIndex   Int
+
+  @@index([orderId])
+}

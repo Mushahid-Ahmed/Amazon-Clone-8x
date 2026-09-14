@@ -7,16 +7,24 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",
+    "postinstall": "prisma generate",
+    "vercel-build": "node scripts/prepare-db.mjs && next build",
+    "db:setup": "prisma db push && tsx prisma/seed.ts",
+    "db:reset": "prisma db push --force-reset && tsx prisma/seed.ts",
+    "test:api": "node scripts/api-smoke.mjs",
     "test:e2e": "playwright test",
     "test:a11y": "playwright test --grep accessibility"
   },
   "dependencies": {
+    "@prisma/client": "^6.16.2",
+    "bcryptjs": "^3.0.2",
     "clsx": "^2.1.1",
     "lucide-react": "^0.468.0",
     "next": "^15.5.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "tailwind-merge": "^2.5.5"
+    "tailwind-merge": "^2.5.5",
+    "zod": "^4.1.8"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.10.2",
@@ -29,7 +37,9 @@
     "eslint": "^9.17.0",
     "eslint-config-next": "^15.5.0",
     "postcss": "^8.4.49",
+    "prisma": "^6.16.2",
     "tailwindcss": "^4.1.0",
+    "tsx": "^4.20.3",
     "typescript": "^5.7.2"
   },
   "overrides": {
