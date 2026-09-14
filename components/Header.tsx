@@ -26,8 +26,10 @@ const categories = [
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
-  const { cartItemCount, user } = useStore();
+  const { cartItemCount, user, authUser, signOut, offline } = useStore();
   const searchParams = useSearchParams();
+  const effectiveUser = authUser ?? user;
+  const defaultAddress = effectiveUser.addresses.find((address) => address.isDefault) ?? effectiveUser.addresses[0];
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<(typeof categories)[number]>("All Departments");
   const [mobileOpen, setMobileOpen] = useState(false);
@@ -76,7 +78,7 @@ export default function Header() {
 
           <Link href="/delivery" className="hidden items-center gap-1 rounded border border-transparent px-2 py-1 hover:border-white lg:flex">
             <MapPin size={18} />
-            <span><small className="block text-xs text-slate-300">Deliver to</small><strong className="text-sm">{user.addresses.find((address) => address.isDefault)?.city ?? "Seattle"} {user.addresses.find((address) => address.isDefault)?.postalCode ?? "98121"}</strong></span>
+            <span><small className="block text-xs text-slate-300">Deliver to</small><strong className="text-sm">{defaultAddress?.city ?? "Seattle"} {defaultAddress?.postalCode ?? "98121"}</strong></span>
           </Link>
 
           <form onSubmit={submitSearch} className="order-3 flex min-w-0 flex-1 overflow-hidden rounded-md bg-white focus-within:ring-2 focus-within:ring-amazon-orange sm:order-none">
@@ -102,7 +104,14 @@ export default function Header() {
           </form>
 
           <div className="hidden items-center gap-1 lg:flex">
-            <Link href="/account" className="rounded border border-transparent px-2 py-1 hover:border-white"><small className="block text-xs text-slate-300">Hello, sign in</small><strong className="text-sm">Account & Lists</strong></Link>
+            {authUser ? (
+              <>
+                <Link href="/account" className="rounded border border-transparent px-2 py-1 hover:border-white"><small className="block text-xs text-slate-300">Hello, {authUser.name.split(" ")[0]}</small><strong className="text-sm">Account & Lists</strong></Link>
+                <button type="button" onClick={() => void signOut()} className="rounded border border-transparent px-2 py-1 text-xs text-slate-300 hover:border-white hover:text-white">Sign out</button>
+              </>
+            ) : (
+              <Link href="/auth" className="rounded border border-transparent px-2 py-1 hover:border-white"><small className="block text-xs text-slate-300">Hello, sign in</small><strong className="text-sm">Account & Lists</strong></Link>
+            )}
             <Link href="/orders" className="rounded border border-transparent px-2 py-1 hover:border-white"><small className="block text-xs text-slate-300">Returns</small><strong className="text-sm">& Orders</strong></Link>
           </div>
           <Link href="/cart" onClick={(event) => { event.preventDefault(); openCartDrawer(); }} className="relative rounded border border-transparent px-2 py-2 hover:border-white" aria-label={`Cart with ${cartItemCount} items`}>
@@ -114,11 +123,24 @@ export default function Header() {
 
         <div className="mx-auto mt-3 flex max-w-7xl items-center gap-2 lg:hidden">
           <Link href="/delivery" className="flex flex-1 items-center gap-2 rounded border border-transparent px-2 py-1 hover:border-white">
-            <MapPin size={17} /><span className="text-xs"><span className="text-slate-300">Deliver to</span> <strong>{user.addresses.find((address) => address.isDefault)?.city ?? "Seattle"} {user.addresses.find((address) => address.isDefault)?.postalCode ?? "98121"}</strong></span>
+            <MapPin size={17} /><span className="text-xs"><span className="text-slate-300">Deliver to</span> <strong>{defaultAddress?.city ?? "Seattle"} {defaultAddress?.postalCode ?? "98121"}</strong></span>
           </Link>
-          <Link href="/account" className="rounded border border-transparent px-2 py-1 text-xs hover:border-white"><UserRound size={16} className="mr-1 inline" />Account</Link>
+          {authUser ? (
+            <>
+              <Link href="/account" className="rounded border border-transparent px-2 py-1 text-xs hover:border-white"><UserRound size={16} className="mr-1 inline" />{authUser.name.split(" ")[0]}</Link>
+              <button type="button" onClick={() => void signOut()} className="rounded border border-transparent px-2 py-1 text-xs hover:border-white">Sign out</button>
+            </>
+          ) : (
+            <Link href="/auth" className="rounded border border-transparent px-2 py-1 text-xs hover:border-white"><UserRound size={16} className="mr-1 inline" />Sign in</Link>
+          )}
         </div>
       </div>
+
+      {offline && (
+        <div role="status" className="bg-amber-100 px-4 py-1.5 text-center text-xs font-semibold text-amber-900">
+          You&apos;re offline — the catalog still works and your changes will sync when you reconnect.
+        </div>
+      )}
 
       <nav className="hidden bg-amazon-navy-light px-4 py-2 lg:block">
         <div className="mx-auto flex max-w-7xl items-center gap-6 text-sm font-semibold">

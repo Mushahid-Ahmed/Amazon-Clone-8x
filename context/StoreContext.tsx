@@ -2,6 +2,7 @@
 
 import {
   createContext,
+  useCallback,
   useContext,
   useEffect,
   useMemo,
@@ -10,9 +11,10 @@ import {
   type ReactNode,
 } from "react";
 import type { CartItem, Order, Product, User } from "../types";
-import type { Address } from "../types";
+import type { Address, AddressInput } from "../types";
 import { calculateShipping, generateOrderId } from "../lib/utils";
 import { products } from "../data/products";
+import { api, ApiClientError } from "../lib/api";
 
 const STORAGE_KEY = "amazon-clone-store";
 
@@ -60,9 +62,14 @@ type StoreAction =
   | { type: "REMOVE_SAVED_ITEM"; productId: string }
   | { type: "MOVE_SAVED_TO_CART"; productId: string }
   | { type: "ADD_ORDER"; order: Order }
+  | { type: "RECORD_ORDER"; order: Order }
+  | { type: "MERGE_ORDERS"; orders: Order[] }
+  | { type: "SET_ORDER_STATUS"; orderId: string; status: Order["status"] }
   | { type: "ADD_RECENTLY_VIEWED"; product: Product }
   | { type: "SET_PRIME"; isPrime: boolean }
   | { type: "SET_DEFAULT_ADDRESS"; addressId: string }
+  | { type: "ADD_ADDRESS"; address: Address }
+  | { type: "REMOVE_ADDRESS"; addressId: string }
   | { type: "HYDRATE"; state: StoreState };
 
 function storeReducer(state: StoreState, action: StoreAction): StoreState {
@@ -117,6 +124,19 @@ function storeReducer(state: StoreState, action: StoreAction): StoreState {
         user: { ...state.user, orders: [action.order, ...state.user.orders] },
         cart: [],
       };
+    case "RECORD_ORDER":
+      return state.orders.some((order) => order.id === action.order.id)
+        ? state
+        : { ...state, orders: [action.order, ...state.orders] };
+    case "MERGE_ORDERS":
+      return { ...state, orders: mergeOrders(state.orders, action.orders) };
+    case "SET_ORDER_STATUS":
+      return {
+        ...state,
+        orders: state.orders.map((order) =>
+          order.id === action.orderId ? { ...order, status: action.status } : order,
+        ),
+      };
     case "ADD_RECENTLY_VIEWED":
       return {
         ...state,
@@ -138,6 +158,16 @@ function storeReducer(state: StoreState, action: StoreAction): StoreState {
           })),
         },
       };
+    case "ADD_ADDRESS":
+      return { ...state, user: { ...state.user, addresses: [...state.user.addresses, action.address] } };
+    case "REMOVE_ADDRESS":
+      return {
+        ...state,
+        user: {
+          ...state.user,
+          addresses: state.user.addresses.filter((address) => address.id !== action.addressId),
+        },
+      };
     case "HYDRATE":
       return action.state;
     default:
@@ -148,6 +178,8 @@ function storeReducer(state: StoreState, action: StoreAction): StoreState {
 export interface StoreContextValue extends StoreState {
   mounted: boolean;
   hydrated: boolean;
+  offline: boolean;
+  authUser: User | null;
   cartItemCount: number;
   cartSubtotal: number;
   addToCart: (product: Product, quantity?: number) => void;
@@ -157,10 +189,18 @@ export interface StoreContextValue extends StoreState {
   removeSavedItem: (productId: string) => void;
   moveSavedToCart: (productId: string) => void;
   addOrder: (order: Order) => void;
+  recordOrder: (order: Order) => void;
   placeOrder: (address: Address, paymentMethod: string) => Order;
+  placeOrderRemote: (address: Address, paymentMethod: string) => Promise<Order>;
+  cancelOrder: (orderId: string) => Promise<boolean>;
   addRecentlyViewed: (product: Product) => void;
   setPrime: (isPrime: boolean) => void;
   setDefaultAddress: (addressId: string) => void;
+  addAddress: (address: AddressInput) => Promise<Address>;
+  removeAddress: (addressId: string) => void;
+  signIn: (email: string, password: string) => Promise<void>;
+  signUp: (name: string, email: string, password: string) => Promise<void>;
+  signOut: () => Promise<void>;
 }
 
 const StoreContext = createContext<StoreContextValue | undefined>(undefined);
@@ -186,13 +226,21 @@ function sanitizeStoredState(value: unknown): StoreState {
   return { ...initialState, cart, savedItems, orders: Array.isArray(saved.orders) ? saved.orders : [], recentlyViewed: [] };
 }
 
+function mergeOrders(local: Order[], remote: Order[]): Order[] {
+  const seen = new Set(remote.map((order) => order.id));
+  return [...remote, ...local.filter((order) => !seen.has(order.id))];
+}
+
 export function StoreProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(storeReducer, initialState);
   const [mounted, setMounted] = useState(false);
   const [hydrated, setHydrated] = useState(false);
+  const [offline, setOffline] = useState(false);
+  const [authUser, setAuthUser] = useState<User | null>(null);
 
   useEffect(() => {
     setMounted(true);
+    let cancelled = false;
     try {
       const stored = window.localStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -204,31 +252,84 @@ export function StoreProvider({ children }: { children: ReactNode }) {
     } finally {
       setHydrated(true);
     }
+    api
+      .get<{ user: User | null }>("/api/auth/me")
+      .then(async ({ user }) => {
+        if (cancelled || !user) return;
+        setAuthUser(user);
+        setOffline(false);
+        const { orders } = await api.get<{ orders: Order[] }>("/api/orders");
+        if (cancelled) return;
+        dispatch({ type: "MERGE_ORDERS", orders });
+      })
+      .catch((error) => {
+        if (!cancelled && error instanceof ApiClientError && error.isNetworkError) setOffline(true);
+      });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
     if (hydrated) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
   }, [hydrated, state]);
 
+  // Fire-and-forget mirror to the API: local state stays authoritative so the
+  // UI never blocks on the network, but every mutation is persisted server-side.
+  function mirror(promise: Promise<unknown>) {
+    promise.then(() => setOffline(false)).catch((error) => {
+      if (error instanceof ApiClientError && error.isNetworkError) setOffline(true);
+    });
+  }
+
+  const refreshAddresses = useCallback(async () => {
+    if (!authUser) return;
+    try {
+      const { addresses } = await api.get<{ addresses: Address[] }>("/api/addresses");
+      setAuthUser((prev) => (prev ? { ...prev, addresses } : prev));
+    } catch {
+      // Offline: local state already reflects the optimistic change.
+    }
+  }, [authUser]);
+
   const value = useMemo<StoreContextValue>(
     () => ({
       ...state,
       mounted,
       hydrated,
+      offline,
+      authUser,
       cartItemCount: state.cart.reduce((count, item) => count + item.quantity, 0),
       cartSubtotal: state.cart.reduce((total, item) => total + item.product.price * item.quantity, 0),
       addToCart: (product, quantity) => {
         const nextState = storeReducer(state, { type: "ADD_TO_CART", product, quantity });
         dispatch({ type: "ADD_TO_CART", product, quantity });
         window.localStorage.setItem(STORAGE_KEY, JSON.stringify(nextState));
+        mirror(api.post("/api/cart", { productId: product.id, quantity: quantity ?? 1 }));
       },
-      removeFromCart: (productId) => dispatch({ type: "REMOVE_FROM_CART", productId }),
-      updateCartQuantity: (productId, quantity) =>
-        dispatch({ type: "UPDATE_CART_QUANTITY", productId, quantity }),
-      saveForLater: (product) => dispatch({ type: "SAVE_FOR_LATER", product }),
-      removeSavedItem: (productId) => dispatch({ type: "REMOVE_SAVED_ITEM", productId }),
-      moveSavedToCart: (productId) => dispatch({ type: "MOVE_SAVED_TO_CART", productId }),
+      removeFromCart: (productId) => {
+        dispatch({ type: "REMOVE_FROM_CART", productId });
+        mirror(api.del(`/api/cart/${productId}`));
+      },
+      updateCartQuantity: (productId, quantity) => {
+        dispatch({ type: "UPDATE_CART_QUANTITY", productId, quantity });
+        if (quantity > 0) mirror(api.patch(`/api/cart/${productId}`, { quantity }));
+        else mirror(api.del(`/api/cart/${productId}`));
+      },
+      saveForLater: (product) => {
+        dispatch({ type: "SAVE_FOR_LATER", product });
+        mirror(api.post(`/api/cart/${product.id}/save`));
+      },
+      removeSavedItem: (productId) => {
+        dispatch({ type: "REMOVE_SAVED_ITEM", productId });
+        mirror(api.del(`/api/cart/${productId}`));
+      },
+      moveSavedToCart: (productId) => {
+        dispatch({ type: "MOVE_SAVED_TO_CART", productId });
+        mirror(api.post(`/api/cart/${productId}/move-to-cart`));
+      },
       addOrder: (order) => dispatch({ type: "ADD_ORDER", order }),
+      recordOrder: (order) => dispatch({ type: "RECORD_ORDER", order }),
       placeOrder: (address, paymentMethod) => {
         const subtotal = state.cart.reduce((total, item) => total + item.product.price * item.quantity, 0);
         const shipping = calculateShipping(subtotal, Boolean(state.user.isPrime));
@@ -253,11 +354,90 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         dispatch({ type: "ADD_ORDER", order });
         return order;
       },
+      placeOrderRemote: async (address, paymentMethod) => {
+        const server = await api.get<{ items: CartItem[] }>("/api/cart");
+        for (const item of state.cart) {
+          const existing = server.items.find((entry) => entry.product.id === item.product.id);
+          if (!existing) {
+            await api.post("/api/cart", { productId: item.product.id, quantity: item.quantity });
+          } else if (existing.quantity !== item.quantity) {
+            await api.patch(`/api/cart/${item.product.id}`, { quantity: item.quantity });
+          }
+        }
+        const { order } = await api.post<{ order: Order }>("/api/orders", {
+          address: {
+            fullName: address.fullName,
+            line1: address.line1,
+            line2: address.line2 || undefined,
+            city: address.city,
+            state: address.state,
+            postalCode: address.postalCode,
+            country: address.country,
+          },
+          paymentMethod,
+        });
+        setOffline(false);
+        dispatch({ type: "ADD_ORDER", order });
+        return order;
+      },
+      cancelOrder: async (orderId) => {
+        try {
+          await api.post(`/api/orders/${orderId}/cancel`);
+          dispatch({ type: "SET_ORDER_STATUS", orderId, status: "cancelled" });
+          return true;
+        } catch {
+          return false;
+        }
+      },
       addRecentlyViewed: (product) => dispatch({ type: "ADD_RECENTLY_VIEWED", product }),
-      setPrime: (isPrime) => dispatch({ type: "SET_PRIME", isPrime }),
-      setDefaultAddress: (addressId) => dispatch({ type: "SET_DEFAULT_ADDRESS", addressId }),
+      setPrime: (isPrime) => {
+        dispatch({ type: "SET_PRIME", isPrime });
+        if (authUser) {
+          setAuthUser((prev) => (prev ? { ...prev, isPrime } : prev));
+          mirror(api.patch("/api/users/me", { isPrime }));
+        }
+      },
+      setDefaultAddress: (addressId) => {
+        dispatch({ type: "SET_DEFAULT_ADDRESS", addressId });
+        if (authUser) mirror(api.patch(`/api/addresses/${addressId}`, { isDefault: true }).then(refreshAddresses));
+      },
+      addAddress: async (address) => {
+        if (authUser) {
+          const { address: created } = await api.post<{ address: Address }>("/api/addresses", {
+            ...address,
+            line2: address.line2 || undefined,
+          });
+          setOffline(false);
+          dispatch({ type: "ADD_ADDRESS", address: created });
+          void refreshAddresses();
+          return created;
+        }
+        const local: Address = { ...address, id: `local-${crypto.randomUUID()}` };
+        dispatch({ type: "ADD_ADDRESS", address: local });
+        return local;
+      },
+      removeAddress: (addressId) => {
+        dispatch({ type: "REMOVE_ADDRESS", addressId });
+        if (authUser) mirror(api.del(`/api/addresses/${addressId}`).then(refreshAddresses));
+      },
+      signIn: async (email, password) => {
+        const { user } = await api.post<{ user: User }>("/api/auth/login", { email, password });
+        setAuthUser(user);
+        setOffline(false);
+        const { orders } = await api.get<{ orders: Order[] }>("/api/orders");
+        dispatch({ type: "MERGE_ORDERS", orders });
+      },
+      signUp: async (name, email, password) => {
+        const { user } = await api.post<{ user: User }>("/api/auth/register", { name, email, password });
+        setAuthUser(user);
+        setOffline(false);
+      },
+      signOut: async () => {
+        await api.post("/api/auth/logout").catch(() => undefined);
+        setAuthUser(null);
+      },
     }),
-    [hydrated, mounted, state],
+    [authUser, hydrated, mounted, offline, refreshAddresses, state],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

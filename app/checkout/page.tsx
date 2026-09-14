@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { Check, ShieldCheck } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
 import { useStore } from "../../context/StoreContext";
+import { ApiClientError } from "../../lib/api";
 import type { Address } from "../../types";
 import { calculateShipping, formatPrice } from "../../lib/utils";
 import { products } from "../../data/products";
@@ -23,12 +24,13 @@ const emptyAddress: Address = {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, cartSubtotal, user, hydrated, addToCart, placeOrder } = useStore();
+  const { cart, cartSubtotal, user, hydrated, addToCart, placeOrder, placeOrderRemote } = useStore();
   const [step, setStep] = useState(0);
   const [address, setAddress] = useState<Address>(user.addresses.find((item) => item.isDefault) ?? emptyAddress);
   const [paymentMethod, setPaymentMethod] = useState("Visa ending in 4242");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
     const defaultAddress = user.addresses.find((item) => item.isDefault);
@@ -56,11 +58,24 @@ export default function CheckoutPage() {
     if (validateAddress()) setStep(1);
   }
 
-  function submitOrder() {
+  async function submitOrder() {
     if (submitting || cart.length === 0) return;
     setSubmitting(true);
-    const order = placeOrder(address, paymentMethod);
-    router.push(`/order-confirmation/${order.id}`);
+    setSubmitError("");
+    try {
+      const order = await placeOrderRemote(address, paymentMethod);
+      router.push(`/order-confirmation/${order.id}`);
+    } catch (error) {
+      if (error instanceof ApiClientError && !error.isNetworkError) {
+        setSubmitError(error.message);
+        setSubmitting(false);
+        if (error.code === "PAYMENT_DECLINED" || error.code === "INVALID_PAYMENT_METHOD") setStep(1);
+      } else {
+        // API unreachable: fall back to the local order flow so checkout always completes.
+        const order = placeOrder(address, paymentMethod);
+        router.push(`/order-confirmation/${order.id}`);
+      }
+    }
   }
 
   if (cart.length === 0) return <div className="mx-auto max-w-2xl px-4 py-20 text-center"><h1 className="text-3xl font-bold">Your checkout is waiting</h1><p className="mt-3 text-slate-600">Your cart is empty, but we picked a Prime favorite to get you started.</p><button type="button" onClick={() => addToCart(products[0])} className="mt-7 rounded-full bg-amazon-yellow px-6 py-3 font-semibold hover:bg-amber-400">Add Demo Prime Item to Cart &amp; Checkout</button></div>;
@@ -82,7 +97,7 @@ export default function CheckoutPage() {
               <button type="submit" className="mt-6 rounded-full bg-amazon-yellow px-6 py-3 font-semibold hover:bg-amber-400">Use this address</button>
             </form>}
             {step === 1 && <section><h1 className="text-2xl font-bold">Payment method</h1><p className="mt-1 text-sm text-slate-600">Choose how you&apos;d like to pay.</p><fieldset className="mt-5 space-y-3"><legend className="sr-only">Payment options</legend>{["Visa ending in 4242", "Mastercard ending in 5555", "Cash on delivery"].map((method) => <label key={method} className={`flex cursor-pointer items-center gap-3 rounded border p-4 ${paymentMethod === method ? "border-amazon-orange bg-amber-50" : "border-slate-300"}`}><input type="radio" name="payment" value={method} checked={paymentMethod === method} onChange={(event) => setPaymentMethod(event.target.value)} /> <span>{method}</span></label>)}</fieldset><div className="mt-6 flex gap-3"><button type="button" onClick={() => setStep(0)} className="rounded-full border border-slate-400 px-5 py-2.5">Back</button><button type="button" onClick={() => setStep(2)} className="rounded-full bg-amazon-yellow px-6 py-2.5 font-semibold">Continue</button></div></section>}
-            {step === 2 && <section><h1 className="text-2xl font-bold">Review your order</h1><div className="mt-5 rounded border border-slate-300 p-4"><div className="flex justify-between gap-4"><div><h2 className="font-bold">Shipping to</h2><p className="mt-1 text-sm text-slate-600">{address.fullName}<br />{address.line1}{address.line2 && <><br />{address.line2}</>}<br />{address.city}, {address.state} {address.postalCode}</p></div><button type="button" onClick={() => setStep(0)} className="text-sm text-amazon-link hover:underline">Change</button></div><div className="mt-4 border-t border-slate-200 pt-4"><h2 className="font-bold">Payment</h2><p className="mt-1 text-sm text-slate-600">{paymentMethod}</p></div></div><div className="mt-6 flex gap-3"><button type="button" onClick={() => setStep(1)} disabled={submitting} className="rounded-full border border-slate-400 px-5 py-2.5 disabled:opacity-50">Back</button><button type="button" onClick={submitOrder} disabled={submitting} className="rounded-full bg-amazon-orange px-7 py-2.5 font-semibold hover:bg-orange-500 disabled:cursor-wait disabled:opacity-60">{submitting ? "Placing order…" : "Place your order"}</button></div></section>}
+            {step === 2 && <section><h1 className="text-2xl font-bold">Review your order</h1><div className="mt-5 rounded border border-slate-300 p-4"><div className="flex justify-between gap-4"><div><h2 className="font-bold">Shipping to</h2><p className="mt-1 text-sm text-slate-600">{address.fullName}<br />{address.line1}{address.line2 && <><br />{address.line2}</>}<br />{address.city}, {address.state} {address.postalCode}</p></div><button type="button" onClick={() => setStep(0)} className="text-sm text-amazon-link hover:underline">Change</button></div><div className="mt-4 border-t border-slate-200 pt-4"><h2 className="font-bold">Payment</h2><p className="mt-1 text-sm text-slate-600">{paymentMethod}</p></div></div>{submitError && <p role="alert" className="mt-4 rounded border border-red-300 bg-red-50 px-4 py-3 text-sm text-red-700">{submitError}</p>}<div className="mt-6 flex gap-3"><button type="button" onClick={() => setStep(1)} disabled={submitting} className="rounded-full border border-slate-400 px-5 py-2.5 disabled:opacity-50">Back</button><button type="button" onClick={submitOrder} disabled={submitting} className="rounded-full bg-amazon-orange px-7 py-2.5 font-semibold hover:bg-orange-500 disabled:cursor-wait disabled:opacity-60">{submitting ? "Placing order…" : "Place your order"}</button></div></section>}
           </section>
           <aside className="h-fit rounded-lg border border-slate-300 bg-white p-5 lg:sticky lg:top-4"><h2 className="text-lg font-bold">Order summary</h2><div className="mt-4 space-y-2 border-b border-slate-200 pb-4 text-sm"><div className="flex justify-between"><span>Items ({cart.reduce((count, item) => count + item.quantity, 0)})</span><span>{formatPrice(cartSubtotal)}</span></div><div className="flex justify-between"><span>Shipping</span><span>{shipping === 0 ? "FREE" : formatPrice(shipping)}</span></div><div className="flex justify-between"><span>Estimated tax</span><span>{formatPrice(tax)}</span></div></div><div className="mt-4 flex justify-between text-lg font-bold text-amazon-red"><span>Order total</span><span>{formatPrice(total)}</span></div><p className="mt-4 flex gap-2 border-t border-slate-200 pt-4 text-xs text-slate-600"><ShieldCheck size={16} className="shrink-0 text-emerald-700" />Your payment information is secure.</p></aside>
         </div>

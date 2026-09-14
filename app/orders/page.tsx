@@ -39,7 +39,7 @@ function BuyAgainCard({ product, onAdd }: { product: Product; onAdd: () => void 
 }
 
 export default function OrdersPage() {
-  const { orders, addToCart } = useStore();
+  const { orders, addToCart, cancelOrder } = useStore();
   const [tab, setTab] = useState<Tab>("orders");
   const [query, setQuery] = useState("");
   const pastProducts = useMemo(() => {
@@ -87,7 +87,9 @@ export default function OrdersPage() {
               <div className="mb-5 flex flex-wrap items-center justify-between gap-2"><div><h2 className="text-lg font-bold capitalize">{order.status === "processing" ? "Arriving soon" : order.status}</h2><p className="text-sm text-slate-600">{order.tracking.find((step) => step.completed)?.description ?? "We’re processing your order."}</p></div><Link href={`/order-confirmation/${order.id}`} className="text-sm font-semibold text-amazon-link hover:underline">View order details</Link></div>
               <TrackingProgress steps={order.tracking} status={order.status} />
               <div className="mt-6 divide-y divide-slate-200 border-t border-slate-200">{order.items.map(({ product, quantity }) => <div key={product.id} className="flex gap-4 py-4"><Link href={`/product/${product.id}`} className="relative h-20 w-20 shrink-0 overflow-hidden rounded bg-slate-100"><Image src={product.images[0]} alt={product.title} fill sizes="80px" className="object-cover" /></Link><div className="min-w-0 flex-1"><Link href={`/product/${product.id}`} className="line-clamp-2 text-sm font-medium text-amazon-link hover:underline">{product.title}</Link><p className="mt-1 text-sm text-slate-600">Qty: {quantity}</p><p className="mt-1 font-semibold">{formatPrice(product.price * quantity)}</p></div><button type="button" onClick={() => addToCart(product)} className="hidden h-fit rounded-full border border-slate-400 px-3 py-2 text-xs font-semibold hover:bg-slate-50 sm:block">Buy it again</button></div>)}</div>
-              <div className="mt-4 flex flex-wrap gap-3"><Link href={`/order-confirmation/${order.id}`} className="rounded-full border border-slate-400 px-4 py-2 text-sm font-semibold hover:bg-slate-50">Track package</Link><button type="button" onClick={() => order.items.forEach(({ product }) => addToCart(product))} className="rounded-full bg-amazon-yellow px-4 py-2 text-sm font-semibold hover:bg-amber-400">Add all to cart</button></div>
+              <div className="mt-4 flex flex-wrap gap-3">
+                {order.status === "processing" && <button type="button" onClick={() => void cancelOrder(order.id)} className="rounded-full border border-red-300 px-4 py-2 text-sm font-semibold text-red-700 hover:bg-red-50">Cancel order</button>}
+                <Link href={`/order-confirmation/${order.id}`} className="rounded-full border border-slate-400 px-4 py-2 text-sm font-semibold hover:bg-slate-50">Track package</Link><button type="button" onClick={() => order.items.forEach(({ product }) => addToCart(product))} className="rounded-full bg-amazon-yellow px-4 py-2 text-sm font-semibold hover:bg-amber-400">Add all to cart</button></div>
             </div>
           </article>)}</div>
         )}

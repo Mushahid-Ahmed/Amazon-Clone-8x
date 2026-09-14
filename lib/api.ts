@@ -1,0 +1,44 @@
+export class ApiClientError extends Error {
+  constructor(
+    public status: number,
+    public code: string,
+    message: string,
+    public isNetworkError = false,
+  ) {
+    super(message);
+    this.name = "ApiClientError";
+  }
+}
+
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  let response: Response;
+  try {
+    response = await fetch(path, {
+      ...init,
+      headers: { "Content-Type": "application/json", ...init?.headers },
+      credentials: "same-origin",
+    });
+  } catch {
+    throw new ApiClientError(0, "NETWORK_ERROR", "The server is unreachable. Check your connection.", true);
+  }
+  const text = await response.text();
+  const body = text ? JSON.parse(text) : {};
+  if (!response.ok) {
+    const error = body?.error;
+    throw new ApiClientError(
+      response.status,
+      error?.code ?? "UNKNOWN_ERROR",
+      error?.message ?? `Request failed with status ${response.status}.`,
+    );
+  }
+  return body as T;
+}
+
+export const api = {
+  get: <T>(path: string) => request<T>(path),
+  post: <T>(path: string, data?: unknown) =>
+    request<T>(path, { method: "POST", body: data === undefined ? undefined : JSON.stringify(data) }),
+  patch: <T>(path: string, data?: unknown) =>
+    request<T>(path, { method: "PATCH", body: data === undefined ? undefined : JSON.stringify(data) }),
+  del: <T>(path: string) => request<T>(path, { method: "DELETE" }),
+};

@@ -44,6 +44,8 @@ export interface Address {
   isDefault: boolean;
 }
 
+export type AddressInput = Omit<Address, "id">;
+
 export interface TrackingStep {
   label: string;
   description: string;
