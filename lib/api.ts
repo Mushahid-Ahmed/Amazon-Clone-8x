@@ -18,7 +18,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
       headers: { "Content-Type": "application/json", ...init?.headers },
       credentials: "same-origin",
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof DOMException && error.name === "AbortError") {
+      throw new ApiClientError(0, "ABORTED", "The request was aborted.");
+    }
     throw new ApiClientError(0, "NETWORK_ERROR", "The server is unreachable. Check your connection.", true);
   }
   const text = await response.text();
@@ -44,10 +47,10 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
 }
 
 export const api = {
-  get: <T>(path: string) => request<T>(path),
-  post: <T>(path: string, data?: unknown) =>
-    request<T>(path, { method: "POST", body: data === undefined ? undefined : JSON.stringify(data) }),
-  patch: <T>(path: string, data?: unknown) =>
-    request<T>(path, { method: "PATCH", body: data === undefined ? undefined : JSON.stringify(data) }),
-  del: <T>(path: string) => request<T>(path, { method: "DELETE" }),
+  get: <T>(path: string, init?: RequestInit) => request<T>(path, init),
+  post: <T>(path: string, data?: unknown, init?: RequestInit) =>
+    request<T>(path, { ...init, method: "POST", body: data === undefined ? undefined : JSON.stringify(data) }),
+  patch: <T>(path: string, data?: unknown, init?: RequestInit) =>
+    request<T>(path, { ...init, method: "PATCH", body: data === undefined ? undefined : JSON.stringify(data) }),
+  del: <T>(path: string, init?: RequestInit) => request<T>(path, { ...init, method: "DELETE" }),
 };

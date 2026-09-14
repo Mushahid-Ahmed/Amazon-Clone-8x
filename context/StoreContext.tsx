@@ -8,6 +8,7 @@ import {
   useEffect,
   useMemo,
   useReducer,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -245,11 +246,43 @@ export function StoreProvider({ children }: { children: ReactNode }) {
 
   // Fire-and-forget mirror to the API: local state stays authoritative so the
   // UI never blocks on the network, but every mutation is persisted server-side.
-  function mirror(promise: Promise<unknown>) {
-    promise.then(() => setOffline(false)).catch((error) => {
-      if (error instanceof ApiClientError && error.isNetworkError) setOffline(true);
-    });
+  // Controllers are tracked so the auth transition can abort stragglers whose
+  // late Set-Cookie would otherwise overwrite the freshly issued session cookie.
+  const pendingMirrors = useRef(new Set<AbortController>());
+
+  function mirror(makeRequest: (signal: AbortSignal) => Promise<unknown>) {
+    const controller = new AbortController();
+    pendingMirrors.current.add(controller);
+    makeRequest(controller.signal)
+      .then(() => setOffline(false))
+      .catch((error) => {
+        if (error instanceof ApiClientError && error.code === "ABORTED") return;
+        if (error instanceof ApiClientError && error.isNetworkError) setOffline(true);
+      })
+      .finally(() => pendingMirrors.current.delete(controller));
   }
+
+  function abortPendingMirrors() {
+    for (const controller of pendingMirrors.current) controller.abort();
+    pendingMirrors.current.clear();
+  }
+
+  // Guest-cart carry-over at the auth transition. The server merge only covers
+  // carts it already knows about; items still queued in local state (mirror not
+  // yet flushed, or its request lost to a navigation) are pushed here so the
+  // account cart ends up matching what the guest actually had.
+  const reconcileCartWithServer = useCallback(async () => {
+    if (state.cart.length === 0) return;
+    const { items } = await api.get<{ items: CartItem[] }>("/api/cart");
+    for (const item of state.cart) {
+      const existing = items.find((entry) => entry.product.id === item.product.id);
+      if (!existing) {
+        await api.post("/api/cart", { productId: item.product.id, quantity: item.quantity });
+      } else if (existing.quantity !== item.quantity) {
+        await api.patch(`/api/cart/${item.product.id}`, { quantity: item.quantity });
+      }
+    }
+  }, [state.cart]);
 
   const refreshAddresses = useCallback(async () => {
     if (!authUser) return;
@@ -274,28 +307,28 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       cartSubtotal: state.cart.reduce((total, item) => total + item.product.price * item.quantity, 0),
       addToCart: (product, quantity) => {
         dispatch({ type: "ADD_TO_CART", product, quantity });
-        mirror(api.post("/api/cart", { productId: product.id, quantity: quantity ?? 1 }));
+        mirror((signal) => api.post("/api/cart", { productId: product.id, quantity: quantity ?? 1 }, { signal }));
       },
       removeFromCart: (productId) => {
         dispatch({ type: "REMOVE_FROM_CART", productId });
-        mirror(api.del(`/api/cart/${productId}`));
+        mirror((signal) => api.del(`/api/cart/${productId}`, { signal }));
       },
       updateCartQuantity: (productId, quantity) => {
         dispatch({ type: "UPDATE_CART_QUANTITY", productId, quantity });
-        if (quantity > 0) mirror(api.patch(`/api/cart/${productId}`, { quantity }));
-        else mirror(api.del(`/api/cart/${productId}`));
+        if (quantity > 0) mirror((signal) => api.patch(`/api/cart/${productId}`, { quantity }, { signal }));
+        else mirror((signal) => api.del(`/api/cart/${productId}`, { signal }));
       },
       saveForLater: (product) => {
         dispatch({ type: "SAVE_FOR_LATER", product });
-        mirror(api.post(`/api/cart/${product.id}/save`));
+        mirror((signal) => api.post(`/api/cart/${product.id}/save`, undefined, { signal }));
       },
       removeSavedItem: (productId) => {
         dispatch({ type: "REMOVE_SAVED_ITEM", productId });
-        mirror(api.del(`/api/cart/${productId}`));
+        mirror((signal) => api.del(`/api/cart/${productId}`, { signal }));
       },
       moveSavedToCart: (productId) => {
         dispatch({ type: "MOVE_SAVED_TO_CART", productId });
-        mirror(api.post(`/api/cart/${productId}/move-to-cart`));
+        mirror((signal) => api.post(`/api/cart/${productId}/move-to-cart`, undefined, { signal }));
       },
       recordOrder: (order) => dispatch({ type: "RECORD_ORDER", order }),
       placeOrderRemote: async (address, paymentMethod) => {
@@ -337,7 +370,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       setPrime: (isPrime) => {
         if (!authUser) return;
         setAuthUser((prev) => (prev ? { ...prev, isPrime } : prev));
-        mirror(api.patch("/api/users/me", { isPrime }));
+        mirror((signal) => api.patch("/api/users/me", { isPrime }, { signal }));
       },
       setDefaultAddress: (addressId) => {
         if (!authUser) return;
@@ -346,7 +379,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
             ? { ...prev, addresses: prev.addresses.map((address) => ({ ...address, isDefault: address.id === addressId })) }
             : prev,
         );
-        mirror(api.patch(`/api/addresses/${addressId}`, { isDefault: true }).then(refreshAddresses));
+        mirror((signal) => api.patch(`/api/addresses/${addressId}`, { isDefault: true }, { signal }).then(refreshAddresses));
       },
       addAddress: async (address) => {
         const { address: created } = await api.post<{ address: Address }>("/api/addresses", {
@@ -361,18 +394,22 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       removeAddress: (addressId) => {
         if (!authUser) return;
         setAuthUser((prev) => (prev ? { ...prev, addresses: prev.addresses.filter((address) => address.id !== addressId) } : prev));
-        mirror(api.del(`/api/addresses/${addressId}`).then(refreshAddresses));
+        mirror((signal) => api.del(`/api/addresses/${addressId}`, { signal }).then(refreshAddresses));
       },
       signIn: async (email, password) => {
+        abortPendingMirrors();
         const { user } = await api.post<{ user: User }>("/api/auth/login", { email, password });
         setAuthUser(user);
         setOffline(false);
+        await reconcileCartWithServer();
         await syncUserScopedData();
       },
       signUp: async (name, email, password) => {
+        abortPendingMirrors();
         const { user } = await api.post<{ user: User }>("/api/auth/register", { name, email, password });
         setAuthUser(user);
         setOffline(false);
+        await reconcileCartWithServer();
         await syncUserScopedData();
       },
       signOut: async () => {
@@ -382,7 +419,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         dispatch({ type: "SET_ORDERS", orders: [] });
       },
     }),
-    [authReady, authUser, hydrated, mounted, offline, ordersLoaded, refreshAddresses, state, syncUserScopedData],
+    [authReady, authUser, hydrated, mounted, offline, ordersLoaded, reconcileCartWithServer, refreshAddresses, state, syncUserScopedData],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
