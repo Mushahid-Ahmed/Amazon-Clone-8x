@@ -51,6 +51,17 @@ export interface TrackingStep {
   completed: boolean;
 }
 
+export interface Review {
+  id: string;
+  productId: string;
+  authorName: string;
+  rating: number;
+  title: string;
+  body: string;
+  helpful: number;
+  createdAt: string;
+}
+
 export interface Order {
   id: string;
   items: CartItem[];

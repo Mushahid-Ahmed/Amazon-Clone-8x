@@ -1,4 +1,4 @@
-import type { Address, CartItem, Order, PriceTier, Product, ProductCategory, TrackingStep, User } from "../../types";
+import type { Address, CartItem, Order, PriceTier, Product, ProductCategory, Review, TrackingStep, User } from "../../types";
 import type { Prisma } from "@prisma/client";
 
 type ProductRow = Prisma.ProductGetPayload<Record<string, never>>;
@@ -121,4 +121,19 @@ export function toOrder(row: OrderWithItems): Order {
 
 export function toCartItem(row: CartItemWithProduct): CartItem {
   return { product: toProduct(row.product), quantity: row.quantity };
+}
+
+type ReviewRow = Prisma.ReviewGetPayload<Record<string, never>>;
+
+export function toReview(row: ReviewRow): Review {
+  return {
+    id: row.id,
+    productId: row.productId,
+    authorName: row.authorName,
+    rating: row.rating,
+    title: row.title,
+    body: row.body,
+    helpful: row.helpful,
+    createdAt: row.createdAt.toISOString(),
+  };
 }
