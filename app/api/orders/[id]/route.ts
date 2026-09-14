@@ -1,0 +1,27 @@
+import { prisma } from "../../../../lib/server/db";
+import { ApiError, ok, withApi } from "../../../../lib/server/http";
+import { getOrCreateSession, getSessionUser } from "../../../../lib/server/session";
+import { toOrder } from "../../../../lib/server/serializers";
+import { ensureSeeded } from "../../../../lib/server/seed";
+
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
+export const GET = withApi(async (_req, ctx) => {
+  await ensureSeeded();
+  const { id } = await ctx.params;
+  const session = await getOrCreateSession();
+  const user = await getSessionUser();
+  const order = await prisma.order.findFirst({
+    where: {
+      id,
+      OR: [
+        ...(user ? [{ userId: user.id }] : []),
+        { sessionId: session.id },
+      ],
+    },
+    include: { items: true, events: true },
+  });
+  if (!order) throw new ApiError(404, "NOT_FOUND", "Order not found.");
+  return ok({ order: toOrder(order) });
+});

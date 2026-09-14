@@ -108,6 +108,7 @@ export function toOrder(row: OrderWithItems): Order {
       quantity: item.quantity,
     })),
     paymentMethod: row.paymentMethod,
+    paymentStatus: row.paymentStatus as Order["paymentStatus"],
     shippingAddress: JSON.parse(row.shippingAddress) as Address,
     subtotal: row.subtotal,
     shipping: row.shipping,

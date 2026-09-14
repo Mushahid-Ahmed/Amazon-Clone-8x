@@ -66,6 +66,7 @@ export interface Order {
   id: string;
   items: CartItem[];
   paymentMethod?: string;
+  paymentStatus?: "paid" | "pending" | "refunded" | "failed";
   shippingAddress: Address;
   subtotal: number;
   shipping: number;
