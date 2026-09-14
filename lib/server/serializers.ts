@@ -1,7 +1,9 @@
-import type { Address, CartItem, Order, PriceTier, Product, ProductCategory, TrackingStep } from "../../types";
+import type { Address, CartItem, Order, PriceTier, Product, ProductCategory, TrackingStep, User } from "../../types";
 import type { Prisma } from "@prisma/client";
 
 type ProductRow = Prisma.ProductGetPayload<Record<string, never>>;
+
+export type UserWithAddresses = Prisma.UserGetPayload<{ include: { addresses: true } }>;
 
 type OrderWithItems = Prisma.OrderGetPayload<{ include: { items: true; events: true } }>;
 
@@ -59,6 +61,17 @@ export function toAddress(row: AddressRow): Address {
     postalCode: row.postalCode,
     country: row.country,
     isDefault: row.isDefault,
+  };
+}
+
+export function toUser(row: UserWithAddresses): User {
+  return {
+    id: row.id,
+    name: row.name,
+    email: row.email,
+    isPrime: row.isPrime,
+    addresses: row.addresses.map(toAddress),
+    orders: [],
   };
 }
 

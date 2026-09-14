@@ -34,6 +34,8 @@ model Session {
   createdAt DateTime @default(now())
   expiresAt DateTime
 
+  cartItems CartItem[]
+
   @@index([userId])
   @@index([expiresAt])
 }
@@ -104,8 +106,10 @@ model Review {
 
 model CartItem {
   id            String   @id @default(cuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sessionId     String?
+  session       Session? @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   productId     String
   product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   quantity      Int      @default(1)
@@ -114,6 +118,7 @@ model CartItem {
   updatedAt     DateTime @updatedAt
 
   @@unique([userId, productId])
+  @@unique([sessionId, productId])
 }
 
 model Order {
