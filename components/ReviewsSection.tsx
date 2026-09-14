@@ -192,7 +192,7 @@ export default function ReviewsSection({ product }: { product: Product }) {
           )}
 
           {loading ? (
-            <p className="text-sm text-slate-500">Loading reviews…</p>
+            <p className="text-sm text-slate-600">Loading reviews…</p>
           ) : reviews.length === 0 ? (
             <p className="text-sm text-slate-600">No reviews yet. Be the first to share your experience.</p>
           ) : (

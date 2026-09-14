@@ -6,6 +6,10 @@ import { daysAgo, REVIEW_SEEDS } from "./seed-data";
 export const DEMO_EMAIL = "alex@demo.com";
 export const DEMO_PASSWORD = "password123";
 
+// Generous enough for repeated demo checkouts (e2e suite buys 2 units per run);
+// the low-stock UX still emerges naturally as orders deplete it.
+export const SEED_STOCK = 50;
+
 export async function seed(): Promise<void> {
   for (const product of products) {
     await prisma.product.upsert({
@@ -29,6 +33,7 @@ export async function seed(): Promise<void> {
         discountRequirement: product.discount?.requirement ?? null,
         features: JSON.stringify(product.features),
         specifications: JSON.stringify(product.specifications),
+        stock: SEED_STOCK,
       },
       create: {
         id: product.id,
@@ -50,7 +55,7 @@ export async function seed(): Promise<void> {
         discountRequirement: product.discount?.requirement ?? null,
         features: JSON.stringify(product.features),
         specifications: JSON.stringify(product.specifications),
-        stock: 25,
+        stock: SEED_STOCK,
       },
     });
   }

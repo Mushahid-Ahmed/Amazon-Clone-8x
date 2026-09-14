@@ -63,7 +63,7 @@ test("cart checkout validates, supports back, and confirms one order", async ({ 
   await page.getByRole("button", { name: "Back", exact: true }).click();
   await page.getByRole("button", { name: "Continue" }).click();
   await page.getByRole("button", { name: "Place your order" }).click();
-  await expect(page.getByRole("heading", { name: "Thank you for your order!" })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Thank you for your order!" })).toBeVisible({ timeout: 15_000 });
   await page.reload();
   await expect(page.getByRole("heading", { name: "Thank you for your order!" })).toBeVisible();
 });

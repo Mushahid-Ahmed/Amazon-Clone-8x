@@ -12,7 +12,7 @@
     "db:setup": "prisma db push && tsx prisma/seed.ts",
     "db:reset": "prisma db push --force-reset && tsx prisma/seed.ts",
     "test:api": "node scripts/reset-stock.mjs && node scripts/api-smoke.mjs",
-    "test:e2e": "playwright test",
+    "test:e2e": "node scripts/reset-stock.mjs && playwright test",
     "test:a11y": "playwright test --grep accessibility"
   },
   "dependencies": {

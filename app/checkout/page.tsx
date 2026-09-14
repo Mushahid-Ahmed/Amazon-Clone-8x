@@ -78,6 +78,8 @@ export default function CheckoutPage() {
     }
   }
 
+  if (cart.length === 0 && submitting) return <div className="mx-auto max-w-2xl px-4 py-20 text-center"><h1 className="text-3xl font-bold">Placing your order…</h1><p className="mt-3 text-slate-600">Hang tight — we&apos;re confirming your order.</p></div>;
+
   if (cart.length === 0) return <div className="mx-auto max-w-2xl px-4 py-20 text-center"><h1 className="text-3xl font-bold">Your checkout is waiting</h1><p className="mt-3 text-slate-600">Your cart is empty, but we picked a Prime favorite to get you started.</p><button type="button" onClick={() => addToCart(products[0])} className="mt-7 rounded-full bg-amazon-yellow px-6 py-3 font-semibold hover:bg-amber-400">Add Demo Prime Item to Cart &amp; Checkout</button></div>;
 
   return (
