@@ -7,6 +7,7 @@
 
 import { execSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
+import pg from "pg";
 
 const pgUrl =
   process.env.POSTGRES_PRISMA_URL ||
@@ -20,6 +21,16 @@ if (!pgUrl) {
 
 const schema = readFileSync("prisma/schema.prisma", "utf8");
 writeFileSync("prisma/schema.deploy.prisma", schema.replace('provider = "sqlite"', 'provider = "postgresql"'));
+
+// The pre-auth schema allowed guest orders with no owner; the tightened schema
+// requires Order.userId and `db push` cannot make a column required while NULL
+// rows exist. Any ownerless row is legacy data the new API cannot create, so
+// delete it immediately before the constraint lands (idempotent, race-safe).
+const client = new pg.Client({ connectionString: pgUrl });
+await client.connect();
+const { rowCount } = await client.query('DELETE FROM "Order" WHERE "userId" IS NULL');
+await client.end();
+if (rowCount) console.log(`[db] removed ${rowCount} ownerless legacy order(s) before schema push`);
 
 console.log("[db] Postgres detected — pushing schema and generating PostgreSQL client…");
 const env = { ...process.env, DATABASE_URL: pgUrl };
