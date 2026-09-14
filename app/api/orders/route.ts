@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { prisma } from "../../../lib/server/db";
 import { ApiError, ok, withApi } from "../../../lib/server/http";
-import { addressSchema } from "../addresses/route";
+import { addressSchema } from "../../../lib/server/validation";
 import { cartScope, scopeWhere } from "../../../lib/server/cart";
 import { chargePayment } from "../../../lib/server/payment";
 import { getOrCreateSession, getSessionUser } from "../../../lib/server/session";
@@ -31,12 +31,11 @@ const TRACKING_STEPS: Array<{ label: string; description: string }> = [
   { label: "Delivered", description: "Package delivered." },
 ];
 
-export const GET = withApi(async (req) => {
+export const GET = withApi(async () => {
   await ensureSeeded();
   const session = await getOrCreateSession();
-  const scope = scopeWhere(cartScope(session));
   const orders = await prisma.order.findMany({
-    where: scope.userId ? { userId: scope.userId } : { sessionId: scope.sessionId },
+    where: session.user ? { userId: session.user.id } : { sessionId: session.id },
     include: { items: true, events: true },
     orderBy: { placedAt: "desc" },
   });

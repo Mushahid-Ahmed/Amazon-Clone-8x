@@ -9,3 +9,6 @@ prisma/schema.deploy.prisma
 test.db
 test.db-journal
 .vercel/
+test-results/
+playwright-report/
+.test-tmp/

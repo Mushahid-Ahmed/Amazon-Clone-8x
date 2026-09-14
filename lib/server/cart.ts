@@ -15,10 +15,16 @@ export function scopeWhere(scope: CartScope): Prisma.CartItemWhereInput {
 }
 
 export async function findCartItem(scope: CartScope, productId: string) {
-  const where = scope.userId
-    ? { userId_productId: { userId: scope.userId, productId } }
-    : { sessionId_productId: { sessionId: scope.sessionId, productId } };
-  return prisma.cartItem.findUnique({ where, include: { product: true } });
+  if (scope.userId !== undefined) {
+    return prisma.cartItem.findUnique({
+      where: { userId_productId: { userId: scope.userId, productId } },
+      include: { product: true },
+    });
+  }
+  return prisma.cartItem.findUnique({
+    where: { sessionId_productId: { sessionId: scope.sessionId, productId } },
+    include: { product: true },
+  });
 }
 
 export async function upsertCartItem(
@@ -28,7 +34,7 @@ export async function upsertCartItem(
   savedForLater = false,
 ) {
   const data = { quantity, savedForLater };
-  if (scope.userId) {
+  if (scope.userId !== undefined) {
     return prisma.cartItem.upsert({
       where: { userId_productId: { userId: scope.userId, productId } },
       create: { userId: scope.userId, productId, ...data },

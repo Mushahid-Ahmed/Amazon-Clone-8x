@@ -1,22 +1,11 @@
-import { z } from "zod";
 import { prisma } from "../../../lib/server/db";
 import { ok, parseBody, withApi } from "../../../lib/server/http";
 import { requireUser } from "../../../lib/server/session";
 import { toAddress } from "../../../lib/server/serializers";
+import { addressSchema } from "../../../lib/server/validation";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
-export const addressSchema = z.object({
-  fullName: z.string().trim().min(2).max(80),
-  line1: z.string().trim().min(3).max(120),
-  line2: z.string().trim().max(120).optional().or(z.literal("")),
-  city: z.string().trim().min(2).max(60),
-  state: z.string().trim().min(2).max(60),
-  postalCode: z.string().trim().min(3).max(12),
-  country: z.string().trim().min(2).max(60).default("United States"),
-  isDefault: z.boolean().optional(),
-});
 
 export const GET = withApi(async () => {
   const user = await requireUser();

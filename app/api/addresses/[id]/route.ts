@@ -2,7 +2,7 @@ import { prisma } from "../../../../lib/server/db";
 import { ApiError, ok, parseBody, withApi } from "../../../../lib/server/http";
 import { requireUser } from "../../../../lib/server/session";
 import { toAddress } from "../../../../lib/server/serializers";
-import { addressSchema } from "../route";
+import { addressSchema } from "../../../../lib/server/validation";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
