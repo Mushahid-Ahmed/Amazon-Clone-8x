@@ -11,15 +11,18 @@ locally and Vercel Postgres in production.
 - **Catalog** — search, category/flag/price filters, five sort orders,
   pagination, product detail pages.
 - **Auth** — register/login/logout with bcrypt-hashed passwords and
-  httpOnly session cookies; guest sessions work for every flow without an
-  account, and a guest cart merges into the user's cart on login.
+  httpOnly session cookies; no demo or shared account. Guests can browse
+  and cart, but every order, tracking, and account endpoint requires an
+  authenticated session, and a guest cart merges into the user's cart on
+  login.
 - **Cart** — session- or user-scoped items, quantity caps, save-for-later,
   stock guards, server-side merge on login.
-- **Checkout** — server-computed totals (shipping rules, 8.5% tax), saved
-  addresses or inline address entry, mock payment gateway (card ending
-  4242/5555 approves, 0000 declines with 402, cash on delivery marks the
-  payment pending), transactional stock decrement with order/items/tracking
-  events created atomically, order history, cancel with restock.
+- **Checkout** — authentication required; server-computed totals (shipping
+  rules, 8.5% tax), saved addresses or inline address entry, mock payment
+  gateway (card ending 4242/5555 approves, 0000 declines with 402, cash on
+  delivery marks the payment pending), transactional stock decrement with
+  order/items/tracking events created atomically, user-scoped order
+  history (foreign order IDs return 404), cancel with restock.
 - **Reviews** — one review per user per product, rating/review-count
   recompute from aggregates, helpful votes, four sort orders.
 - **Accounts** — address book with default-address semantics, Prime toggle,
@@ -33,7 +36,7 @@ locally and Vercel Postgres in production.
 | API        | Route handlers, Zod validation, uniform JSON error envelope   |
 | ORM/DB     | Prisma 6 — SQLite locally, Vercel Postgres in production      |
 | Auth       | Custom DB sessions (sha256-hashed tokens), bcrypt, 7-day TTL  |
-| Testing    | API smoke suite (66 checks), Playwright e2e at 4 viewports, axe |
+| Testing    | API smoke suite (78 checks), Playwright e2e at 4 viewports, axe |
 | Deploy     | Vercel (`vercel-build` prepares the Postgres schema + seed)   |
 
 ## Run locally
@@ -44,13 +47,16 @@ npm run db:setup     # create + seed the SQLite database
 npm run dev          # http://localhost:3000
 ```
 
-Demo account: **alex@demo.com / password123** (or register your own, or
-stay logged out — guests get the full cart/checkout flow).
+Visitors browse and build a cart without an account. Checkout, order
+history, order tracking, and account pages require signing in — you'll be
+redirected to `/auth` and returned to where you were after logging in.
+Register your own account from the sign-in page; a guest cart merges into
+your account cart at login.
 
 Other scripts:
 
 ```bash
-npm run test:api     # 66-check API smoke suite (idempotent)
+npm run test:api     # 78-check API smoke suite (idempotent)
 npm run test:e2e     # Playwright across 375/768/1024/1440 viewports
 npm run test:a11y    # accessibility subset (axe, zero serious violations)
 npm run build        # production build

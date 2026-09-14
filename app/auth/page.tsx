@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState, type FormEvent } from "react";
+import { Suspense, useEffect, useState, type FormEvent } from "react";
 import { useStore } from "../../context/StoreContext";
 import { ApiClientError } from "../../lib/api";
 
@@ -29,10 +29,11 @@ function AuthForm() {
 
   const redirectTo = searchParams.get("redirect") ?? "/account";
 
-  if (hydrated && authUser) {
-    router.replace(redirectTo);
-    return null;
-  }
+  // Navigating during render is ignored by the App Router, so signed-in
+  // visitors are sent to their destination from an effect instead.
+  useEffect(() => {
+    if (hydrated && authUser && !pending) router.replace(redirectTo);
+  }, [authUser, hydrated, pending, redirectTo, router]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -54,13 +55,6 @@ function AuthForm() {
       }
       setPending(false);
     }
-  }
-
-  function fillDemo() {
-    setMode("signin");
-    setEmail("alex@demo.com");
-    setPassword("password123");
-    setError("");
   }
 
   return (
@@ -97,16 +91,9 @@ function AuthForm() {
             {pending ? "Please wait…" : mode === "signin" ? "Sign in" : "Create your account"}
           </button>
         </form>
-
-        <div className="mt-5 border-t border-slate-200 pt-4">
-          <p className="text-xs text-slate-500">Evaluating the demo? Use the demo account:</p>
-          <button type="button" onClick={fillDemo} className="mt-2 w-full rounded-full border border-slate-400 py-2 text-sm font-semibold hover:bg-slate-50">
-            Use demo account (alex@demo.com)
-          </button>
-        </div>
       </div>
-      <p className="mt-6 text-center text-xs text-slate-500">
-        By continuing, you agree to the demo <span className="text-amazon-link">Conditions of Use</span> and <span className="text-amazon-link">Privacy Notice</span>.
+      <p className="mt-6 text-center text-xs text-slate-600">
+        By continuing, you agree to the <span className="text-amazon-link">Conditions of Use</span> and <span className="text-amazon-link">Privacy Notice</span>.
       </p>
       <p className="mt-4 text-center text-sm"><Link href="/" className="text-amazon-link hover:underline">← Back to shopping</Link></p>
     </div>

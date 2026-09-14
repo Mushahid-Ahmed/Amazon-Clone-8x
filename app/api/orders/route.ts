@@ -2,9 +2,8 @@ import { z } from "zod";
 import { prisma } from "../../../lib/server/db";
 import { ApiError, ok, withApi } from "../../../lib/server/http";
 import { addressSchema } from "../../../lib/server/validation";
-import { cartScope, scopeWhere } from "../../../lib/server/cart";
 import { chargePayment } from "../../../lib/server/payment";
-import { getOrCreateSession, getSessionUser } from "../../../lib/server/session";
+import { requireUser } from "../../../lib/server/session";
 import { toOrder } from "../../../lib/server/serializers";
 import { ensureSeeded } from "../../../lib/server/seed";
 import { generateOrderId } from "../../../lib/utils";
@@ -33,9 +32,9 @@ const TRACKING_STEPS: Array<{ label: string; description: string }> = [
 
 export const GET = withApi(async () => {
   await ensureSeeded();
-  const session = await getOrCreateSession();
+  const user = await requireUser();
   const orders = await prisma.order.findMany({
-    where: session.user ? { userId: session.user.id } : { sessionId: session.id },
+    where: { userId: user.id },
     include: { items: true, events: true },
     orderBy: { placedAt: "desc" },
   });
@@ -44,13 +43,11 @@ export const GET = withApi(async () => {
 
 export const POST = withApi(async (req) => {
   await ensureSeeded();
+  const user = await requireUser();
   const input = placeOrderSchema.parse(await req.json().catch(() => ({})));
-  const session = await getOrCreateSession();
-  const scope = cartScope(session);
-  const scopeFilter = scopeWhere(scope);
 
   const cartItems = await prisma.cartItem.findMany({
-    where: { ...scopeFilter, savedForLater: false },
+    where: { userId: user.id, savedForLater: false },
     include: { product: true },
   });
   if (cartItems.length === 0) {
@@ -59,8 +56,6 @@ export const POST = withApi(async (req) => {
 
   let shippingAddress: Prisma.InputJsonValue;
   if (input.addressId) {
-    const user = await getSessionUser();
-    if (!user) throw new ApiError(401, "UNAUTHENTICATED", "Log in to use a saved address.");
     const address = await prisma.address.findFirst({ where: { id: input.addressId, userId: user.id } });
     if (!address) throw new ApiError(404, "NOT_FOUND", "Address not found.");
     shippingAddress = {
@@ -80,13 +75,12 @@ export const POST = withApi(async (req) => {
   }
 
   const subtotal = Math.round(cartItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0) * 100) / 100;
-  const isPrime = session.user?.isPrime ?? false;
-  const shipping = calculateShippingForOrder(subtotal, isPrime);
+  const shipping = calculateShippingForOrder(subtotal, user.isPrime);
   const tax = Math.round(subtotal * 0.085 * 100) / 100;
   const total = Math.round((subtotal + shipping + tax) * 100) / 100;
 
   const digits = resolvePaymentMethodDigits(input.paymentMethod);
-  const charge = await chargePayment({ method: digits, amount: total, email: session.user?.email });
+  const charge = await chargePayment({ method: digits, amount: total, email: user.email });
 
   const orderId = generateOrderId();
   const order = await prisma.$transaction(async (tx) => {
@@ -102,7 +96,7 @@ export const POST = withApi(async (req) => {
       const created = await tx.order.create({
         data: {
           id: orderId,
-          ...(scope.userId ? { userId: scope.userId } : { sessionId: scope.sessionId }),
+          userId: user.id,
           status: "processing",
           paymentMethod: input.paymentMethod,
           paymentStatus: charge.status,
@@ -115,7 +109,7 @@ export const POST = withApi(async (req) => {
             create: cartItems.map((item) => ({
               productId: item.productId,
               title: item.product.title,
-              image: item.product.images[0] ?? "",
+              image: (JSON.parse(item.product.images) as string[])[0] ?? "",
               price: item.product.price,
               quantity: item.quantity,
             })),
@@ -131,7 +125,7 @@ export const POST = withApi(async (req) => {
         },
         include: { items: true, events: true },
       });
-      await tx.cartItem.deleteMany({ where: { ...scopeFilter, savedForLater: false } });
+      await tx.cartItem.deleteMany({ where: { userId: user.id, savedForLater: false } });
       return created;
     });
     return ok({ order: toOrder(order) }, { status: 201 });

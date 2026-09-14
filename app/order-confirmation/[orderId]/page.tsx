@@ -4,14 +4,15 @@ import Link from "next/link";
 import { CheckCircle2, Package, Truck } from "lucide-react";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { useStore } from "../../../context/StoreContext";
+import { useRequireAuth, useStore } from "../../../context/StoreContext";
 import { api } from "../../../lib/api";
 import { formatPrice } from "../../../lib/utils";
 import type { Order } from "../../../types";
 
 export default function OrderConfirmationPage() {
   const params = useParams<{ orderId: string }>();
-  const { orders, hydrated, recordOrder } = useStore();
+  const { orders, hydrated, authUser, recordOrder } = useStore();
+  useRequireAuth(`/order-confirmation/${params.orderId}`);
   const localOrder = orders.find((item) => item.id === params.orderId);
   const [remoteOrder, setRemoteOrder] = useState<Order | null>(null);
   const [checkedRemote, setCheckedRemote] = useState(false);
@@ -37,6 +38,7 @@ export default function OrderConfirmationPage() {
 
   const order = localOrder ?? remoteOrder;
 
+  if (!hydrated || !authUser) return <div className="mx-auto max-w-3xl px-4 py-16 text-center text-slate-600">Loading order…</div>;
   if (!hydrated || (!order && !checkedRemote)) return <div className="mx-auto max-w-3xl px-4 py-16 text-center">Loading order…</div>;
   if (!order) return <div className="mx-auto max-w-3xl px-4 py-16 text-center"><h1 className="text-2xl font-bold">Order not found</h1><p className="mt-2 text-slate-600">This order may have been placed on another device or the link may be invalid.</p><div className="mt-6 flex flex-wrap justify-center gap-3"><Link href="/orders" className="rounded-full border border-slate-400 px-6 py-3 font-semibold">View orders</Link><Link href="/" className="rounded-full bg-amazon-yellow px-6 py-3 font-semibold">Continue shopping</Link></div></div>;
 

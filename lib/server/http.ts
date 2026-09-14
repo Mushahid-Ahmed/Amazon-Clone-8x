@@ -103,6 +103,15 @@ export function rateLimit(key: string, limit: number, windowMs: number): void {
   }
 }
 
+// IP-keyed limits only make sense when requests carry real client IPs. On
+// localhost every request collapses onto the same fallback key, so the per-IP
+// limiter is a no-op outside production; per-resource limits (e.g. per email)
+// still apply in every environment.
+export function rateLimitIp(req: NextRequest, key: string, limit: number, windowMs: number): void {
+  if (process.env.NODE_ENV !== "production") return;
+  rateLimit(`${key}:${clientIp(req)}`, limit, windowMs);
+}
+
 export function clientIp(req: NextRequest): string {
   return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "local";
 }

@@ -3,10 +3,10 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../../../../lib/server/db";
 import {
   ApiError,
-  clientIp,
   ok,
   parseBody,
   rateLimit,
+  rateLimitIp,
   withApi,
 } from "../../../../lib/server/http";
 import { createSession, getSession } from "../../../../lib/server/session";
@@ -24,7 +24,7 @@ const loginSchema = z.object({
 export const POST = withApi(async (req) => {
   const input = await parseBody(loginSchema, req);
   const email = input.email.trim().toLowerCase();
-  rateLimit(`auth:login:${clientIp(req)}`, 10, 10 * 60 * 1000);
+  rateLimitIp(req, "auth:login", 10, 10 * 60 * 1000);
   rateLimit(`auth:login:email:${email}`, 5, 10 * 60 * 1000);
   const user = await prisma.user.findUnique({ where: { email } });
   const valid = user ? await bcrypt.compare(input.password, user.passwordHash) : false;

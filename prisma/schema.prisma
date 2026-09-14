@@ -35,7 +35,6 @@ model Session {
   expiresAt DateTime
 
   cartItems CartItem[]
-  orders    Order[]
 
   @@index([userId])
   @@index([expiresAt])
@@ -124,10 +123,8 @@ model CartItem {
 
 model Order {
   id              String          @id
-  userId          String?
-  user            User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
-  sessionId       String?
-  session         Session?        @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   status          String          @default("processing")
   paymentMethod   String
   paymentStatus   String          @default("paid")

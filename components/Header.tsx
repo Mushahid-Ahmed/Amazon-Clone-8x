@@ -26,14 +26,26 @@ const categories = [
 export default function Header() {
   const router = useRouter();
   const pathname = usePathname();
-  const { cartItemCount, user, authUser, signOut, offline } = useStore();
+  const { cartItemCount, authUser, signOut, offline } = useStore();
   const searchParams = useSearchParams();
-  const effectiveUser = authUser ?? user;
-  const defaultAddress = effectiveUser.addresses.find((address) => address.isDefault) ?? effectiveUser.addresses[0];
+  const defaultAddress = authUser?.addresses.find((address) => address.isDefault) ?? authUser?.addresses[0];
+  const deliverTo = defaultAddress
+    ? `${defaultAddress.city} ${defaultAddress.postalCode}`
+    : authUser
+      ? "Add an address"
+      : "Sign in to set";
+  const deliverHref = authUser ? "/delivery" : "/auth?redirect=/delivery";
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<(typeof categories)[number]>("All Departments");
   const [mobileOpen, setMobileOpen] = useState(false);
   const [badgePulse, setBadgePulse] = useState(false);
+  // This component hydrates inside a Suspense boundary, which can resolve
+  // after the store has already rehydrated the guest cart from localStorage.
+  // Rendering the count as 0 until mount keeps the hydration pass identical
+  // to the server-rendered markup instead of tripping a mismatch.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+  const badgeCount = mounted ? cartItemCount : 0;
   useEffect(() => {
     if (!cartItemCount) return;
     setBadgePulse(true);
@@ -76,9 +88,9 @@ export default function Header() {
             amazon<span className="text-amazon-orange">.clone</span>
           </Link>
 
-          <Link href="/delivery" className="hidden items-center gap-1 rounded border border-transparent px-2 py-1 hover:border-white lg:flex">
+          <Link href={deliverHref} className="hidden items-center gap-1 rounded border border-transparent px-2 py-1 hover:border-white lg:flex">
             <MapPin size={18} />
-            <span><small className="block text-xs text-slate-300">Deliver to</small><strong className="text-sm">{defaultAddress?.city ?? "Seattle"} {defaultAddress?.postalCode ?? "98121"}</strong></span>
+            <span><small className="block text-xs text-slate-300">Deliver to</small><strong className="text-sm">{deliverTo}</strong></span>
           </Link>
 
           <form onSubmit={submitSearch} className="order-3 flex min-w-0 flex-1 overflow-hidden rounded-md bg-white focus-within:ring-2 focus-within:ring-amazon-orange sm:order-none">
@@ -114,16 +126,16 @@ export default function Header() {
             )}
             <Link href="/orders" className="rounded border border-transparent px-2 py-1 hover:border-white"><small className="block text-xs text-slate-300">Returns</small><strong className="text-sm">& Orders</strong></Link>
           </div>
-          <Link href="/cart" onClick={(event) => { event.preventDefault(); openCartDrawer(); }} className="relative rounded border border-transparent px-2 py-2 hover:border-white" aria-label={`Cart with ${cartItemCount} items`}>
+          <Link href="/cart" onClick={(event) => { event.preventDefault(); openCartDrawer(); }} className="relative rounded border border-transparent px-2 py-2 hover:border-white" aria-label={`Cart with ${badgeCount} items`}>
             <ShoppingCart size={28} />
-            <span className={`absolute -right-1 -top-1 min-w-5 rounded-full bg-amazon-orange px-1 text-center text-xs font-bold text-amazon-navy ${badgePulse ? "animate-pulse" : ""}`}>{cartItemCount}</span>
+            <span className={`absolute -right-1 -top-1 min-w-5 rounded-full bg-amazon-orange px-1 text-center text-xs font-bold text-amazon-navy ${badgePulse ? "animate-pulse" : ""}`}>{badgeCount}</span>
             <span className="hidden text-sm font-bold sm:inline">Cart</span>
           </Link>
         </div>
 
         <div className="mx-auto mt-3 flex max-w-7xl items-center gap-2 lg:hidden">
-          <Link href="/delivery" className="flex flex-1 items-center gap-2 rounded border border-transparent px-2 py-1 hover:border-white">
-            <MapPin size={17} /><span className="text-xs"><span className="text-slate-300">Deliver to</span> <strong>{defaultAddress?.city ?? "Seattle"} {defaultAddress?.postalCode ?? "98121"}</strong></span>
+          <Link href={deliverHref} className="flex flex-1 items-center gap-2 rounded border border-transparent px-2 py-1 hover:border-white">
+            <MapPin size={17} /><span className="text-xs"><span className="text-slate-300">Deliver to</span> <strong>{deliverTo}</strong></span>
           </Link>
           {authUser ? (
             <>
@@ -163,7 +175,7 @@ export default function Header() {
         <Link href="/" className="rounded px-3 py-1 hover:bg-slate-600">Home</Link>
         <Link href="/categories" className="rounded px-3 py-1 hover:bg-slate-600">Categories</Link>
         <Link href="/deals" className="rounded px-3 py-1 hover:bg-slate-600">Deals</Link>
-        <Link href="/cart" className="rounded px-3 py-1 hover:bg-slate-600">Cart ({cartItemCount})</Link>
+        <Link href="/cart" className="rounded px-3 py-1 hover:bg-slate-600">Cart ({badgeCount})</Link>
       </div>
     </header>
   );

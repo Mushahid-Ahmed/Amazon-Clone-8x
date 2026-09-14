@@ -3,10 +3,10 @@ import bcrypt from "bcryptjs";
 import { prisma } from "../../../../lib/server/db";
 import {
   ApiError,
-  clientIp,
   ok,
   parseBody,
   rateLimit,
+  rateLimitIp,
   withApi,
 } from "../../../../lib/server/http";
 import { createSession, getSession } from "../../../../lib/server/session";
@@ -23,9 +23,10 @@ const registerSchema = z.object({
 });
 
 export const POST = withApi(async (req) => {
-  rateLimit(`auth:register:${clientIp(req)}`, 10, 10 * 60 * 1000);
   const input = await parseBody(registerSchema, req);
   const email = input.email.trim().toLowerCase();
+  rateLimitIp(req, "auth:register", 10, 10 * 60 * 1000);
+  rateLimit(`auth:register:email:${email}`, 5, 10 * 60 * 1000);
   const existing = await prisma.user.findUnique({ where: { email } });
   if (existing) throw new ApiError(409, "EMAIL_TAKEN", "An account with this email already exists.");
   const passwordHash = await bcrypt.hash(input.password, 10);

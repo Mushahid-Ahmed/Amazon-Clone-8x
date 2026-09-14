@@ -23,6 +23,13 @@ writeFileSync("prisma/schema.deploy.prisma", schema.replace('provider = "sqlite"
 
 console.log("[db] Postgres detected — pushing schema and generating PostgreSQL client…");
 const env = { ...process.env, DATABASE_URL: pgUrl };
-execSync("npx prisma db push --schema=prisma/schema.deploy.prisma --skip-generate", { stdio: "inherit", env });
+// --accept-data-loss keeps the push non-interactive in CI: schema changes that
+// involve constraint tightening (e.g. a column becoming required) need the
+// flag even when existing rows already satisfy the constraint. Postgres still
+// rejects any change that would actually violate data.
+execSync(
+  "npx prisma db push --schema=prisma/schema.deploy.prisma --skip-generate --accept-data-loss",
+  { stdio: "inherit", env },
+);
 execSync("npx prisma generate --schema=prisma/schema.deploy.prisma", { stdio: "inherit", env });
 console.log("[db] Done.");

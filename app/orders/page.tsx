@@ -5,7 +5,7 @@ import Link from "next/link";
 import { Search, ShoppingCart, PackageOpen } from "lucide-react";
 import { useMemo, useState } from "react";
 import TrackingProgress from "../../components/orders/TrackingProgress";
-import { useStore } from "../../context/StoreContext";
+import { useRequireAuth, useStore } from "../../context/StoreContext";
 import { formatPrice } from "../../lib/utils";
 import type { Product } from "../../types";
 
@@ -39,7 +39,8 @@ function BuyAgainCard({ product, onAdd }: { product: Product; onAdd: () => void 
 }
 
 export default function OrdersPage() {
-  const { orders, addToCart, cancelOrder } = useStore();
+  const { orders, addToCart, cancelOrder, authUser, hydrated, ordersLoaded } = useStore();
+  useRequireAuth("/orders");
   const [tab, setTab] = useState<Tab>("orders");
   const [query, setQuery] = useState("");
   const pastProducts = useMemo(() => {
@@ -56,6 +57,8 @@ export default function OrdersPage() {
     return matchesQuery && matchesTab;
   });
 
+  if (!hydrated || !authUser) return <div className="mx-auto max-w-2xl px-4 py-20 text-center text-slate-600">Loading your orders…</div>;
+  if (!ordersLoaded) return <div className="mx-auto max-w-2xl px-4 py-20 text-center text-slate-600">Loading your orders…</div>;
 
   return (
     <div className="bg-amazon-bg pb-12">

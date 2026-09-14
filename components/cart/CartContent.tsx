@@ -8,8 +8,8 @@ import { useStore } from "../../context/StoreContext";
 
 export default function CartContent() {
   const router = useRouter();
-  const { cart, savedItems, cartSubtotal, cartItemCount, user, updateCartQuantity, removeFromCart, saveForLater, removeSavedItem, moveSavedToCart } = useStore();
-  const qualifies = user.isPrime || cartSubtotal > 25;
+  const { cart, savedItems, cartSubtotal, cartItemCount, authUser, updateCartQuantity, removeFromCart, saveForLater, removeSavedItem, moveSavedToCart } = useStore();
+  const qualifies = (authUser?.isPrime ?? false) || cartSubtotal > 25;
   return (
     <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6">
       <h1 className="mb-5 text-3xl font-bold">Shopping Cart</h1>

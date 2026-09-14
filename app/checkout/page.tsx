@@ -1,13 +1,13 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Check, ShieldCheck } from "lucide-react";
 import { FormEvent, useEffect, useState } from "react";
-import { useStore } from "../../context/StoreContext";
+import { useRequireAuth, useStore } from "../../context/StoreContext";
 import { ApiClientError } from "../../lib/api";
 import type { Address } from "../../types";
 import { calculateShipping, formatPrice } from "../../lib/utils";
-import { products } from "../../data/products";
 
 const steps = ["Shipping", "Payment", "Review"];
 const emptyAddress: Address = {
@@ -24,20 +24,21 @@ const emptyAddress: Address = {
 
 export default function CheckoutPage() {
   const router = useRouter();
-  const { cart, cartSubtotal, user, hydrated, addToCart, placeOrder, placeOrderRemote } = useStore();
+  const { cart, cartSubtotal, authUser, hydrated, placeOrderRemote } = useStore();
+  useRequireAuth("/checkout");
   const [step, setStep] = useState(0);
-  const [address, setAddress] = useState<Address>(user.addresses.find((item) => item.isDefault) ?? emptyAddress);
+  const [address, setAddress] = useState<Address>(emptyAddress);
   const [paymentMethod, setPaymentMethod] = useState("Visa ending in 4242");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
-    const defaultAddress = user.addresses.find((item) => item.isDefault);
+    const defaultAddress = authUser?.addresses.find((item) => item.isDefault);
     if (defaultAddress) setAddress(defaultAddress);
-  }, [hydrated, user.addresses]);
+  }, [hydrated, authUser]);
 
-  const shipping = calculateShipping(cartSubtotal, Boolean(user.isPrime));
+  const shipping = calculateShipping(cartSubtotal, Boolean(authUser?.isPrime));
   const tax = cartSubtotal * 0.085;
   const total = cartSubtotal + shipping + tax;
 
@@ -66,21 +67,21 @@ export default function CheckoutPage() {
       const order = await placeOrderRemote(address, paymentMethod);
       router.push(`/order-confirmation/${order.id}`);
     } catch (error) {
-      if (error instanceof ApiClientError && !error.isNetworkError) {
-        setSubmitError(error.message);
-        setSubmitting(false);
+      if (error instanceof ApiClientError) {
+        setSubmitError(error.isNetworkError ? "We couldn't reach the store. Check your connection and try again." : error.message);
         if (error.code === "PAYMENT_DECLINED" || error.code === "INVALID_PAYMENT_METHOD") setStep(1);
       } else {
-        // API unreachable: fall back to the local order flow so checkout always completes.
-        const order = placeOrder(address, paymentMethod);
-        router.push(`/order-confirmation/${order.id}`);
+        setSubmitError("Something went wrong. Please try again.");
       }
+      setSubmitting(false);
     }
   }
 
   if (cart.length === 0 && submitting) return <div className="mx-auto max-w-2xl px-4 py-20 text-center"><h1 className="text-3xl font-bold">Placing your order…</h1><p className="mt-3 text-slate-600">Hang tight — we&apos;re confirming your order.</p></div>;
 
-  if (cart.length === 0) return <div className="mx-auto max-w-2xl px-4 py-20 text-center"><h1 className="text-3xl font-bold">Your checkout is waiting</h1><p className="mt-3 text-slate-600">Your cart is empty, but we picked a Prime favorite to get you started.</p><button type="button" onClick={() => addToCart(products[0])} className="mt-7 rounded-full bg-amazon-yellow px-6 py-3 font-semibold hover:bg-amber-400">Add Demo Prime Item to Cart &amp; Checkout</button></div>;
+  if (!hydrated || !authUser) return <div className="mx-auto max-w-2xl px-4 py-20 text-center text-slate-600">Loading checkout…</div>;
+
+  if (cart.length === 0) return <div className="mx-auto max-w-2xl px-4 py-20 text-center"><h1 className="text-3xl font-bold">Your cart is empty</h1><p className="mt-3 text-slate-600">Add items to your cart to start checkout.</p><Link href="/" className="mt-7 inline-block rounded-full bg-amazon-yellow px-6 py-3 font-semibold hover:bg-amber-400">Continue shopping</Link></div>;
 
   return (
     <div className="bg-amazon-bg pb-10">
